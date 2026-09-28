@@ -174,6 +174,8 @@
             }
 
             try {
+                console.log("Fetching from Supabase for date:", currentNextSvsDate);
+
                 // Fetch player submissions, hero data, and availability concurrently
                 const [subRes, heroRes, availRes] = await Promise.all([
                     supabaseClient.from('svs_player_submissions').select('*'),
@@ -181,9 +183,19 @@
                     supabaseClient.from('svs_availability').select('*').eq('battle_date', currentNextSvsDate)
                 ]);
 
-                if (subRes.error) throw subRes.error;
-                if (heroRes.error) throw heroRes.error;
-                if (availRes.error) throw availRes.error;
+                // Check individual errors for precise debugging
+                if (subRes.error) {
+                    console.error("Submissions Table Error:", subRes.error);
+                    throw new Error("Submissions error: " + subRes.error.message);
+                }
+                if (heroRes.error) {
+                    console.error("Heroes Table Error:", heroRes.error);
+                    throw new Error("Heroes error: " + heroRes.error.message);
+                }
+                if (availRes.error) {
+                    console.error("Availability Table Error:", availRes.error);
+                    throw new Error("Availability error: " + availRes.error.message);
+                }
 
                 const submissions = subRes.data || [];
                 const heroesData = heroRes.data || [];
@@ -227,8 +239,8 @@
                 document.getElementById('teamResultsSection').classList.add('hidden');
 
             } catch (err) {
-                console.error("Error loading candidates:", err);
-                alert("Failed to load candidates from Supabase. Check console.");
+                console.error("Full Supabase Load Failure:", err);
+                alert("Supabase Error: " + err.message);
             }
         }
 
