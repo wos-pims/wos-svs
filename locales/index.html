@@ -88,15 +88,15 @@
     <!-- Script Logic -->
     <script>
         // --- SUPABASE CONFIGURATION ---
-        // Replace with your actual Supabase URL and Anon Key if not using global injection
         const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // Global variables initialized properly at the top
         let currentNextSvsDate = '';
         let allCandidates = [];
 
-        // Comprehensive list of tracked hero keys (matches your main application keys)
+        // Comprehensive list of tracked hero keys
         const heroKeys = [
             'jessie', 'sergey', 'gina', 'bahiti', 'cloris', 'patrick', 
             'seoyoon', 'alonso', 'molly', 'zinman', 'lynn', 'ahmose', 
@@ -149,14 +149,13 @@
         }
 
         // Accurate power weight calculation supporting Helios vs Standard progression
-        // Satisfies: FC8 Helios > FC8, and FC9 > FC8 Helios, etc.
         function calculateTroopPowerWeight(levelStr) {
             if (!levelStr) return 0;
             const cleanStr = levelStr.toUpperCase().trim();
             const num = parseInt(cleanStr.replace(/[^0-9]/g, '')) || 0;
             const isHelios = cleanStr.includes('HELIOS') || cleanStr.includes('T11');
 
-            // Scale: Standard tier = num * 10. Helios tier adds a +5 bonus (half a tier), 
+            // Scale: Standard tier = num * 10. Helios tier adds a +5 bonus, 
             // ensuring FC8 Helios (85) beats FC8 (80), but is beaten by FC9 Standard (90).
             const baseWeight = num * 10;
             return isHelios ? baseWeight + 5 : baseWeight;
@@ -174,8 +173,6 @@
             }
 
             try {
-                console.log("Fetching from Supabase for date:", currentNextSvsDate);
-
                 // Fetch player submissions, hero data, and availability concurrently
                 const [subRes, heroRes, availRes] = await Promise.all([
                     supabaseClient.from('svs_player_submissions').select('*'),
@@ -183,19 +180,9 @@
                     supabaseClient.from('svs_availability').select('*').eq('battle_date', currentNextSvsDate)
                 ]);
 
-                // Check individual errors for precise debugging
-                if (subRes.error) {
-                    console.error("Submissions Table Error:", subRes.error);
-                    throw new Error("Submissions error: " + subRes.error.message);
-                }
-                if (heroRes.error) {
-                    console.error("Heroes Table Error:", heroRes.error);
-                    throw new Error("Heroes error: " + heroRes.error.message);
-                }
-                if (availRes.error) {
-                    console.error("Availability Table Error:", availRes.error);
-                    throw new Error("Availability error: " + availRes.error.message);
-                }
+                if (subRes.error) throw new Error("Submissions error: " + subRes.error.message);
+                if (heroRes.error) throw new Error("Heroes error: " + heroRes.error.message);
+                if (availRes.error) throw new Error("Availability error: " + availRes.error.message);
 
                 const submissions = subRes.data || [];
                 const heroesData = heroRes.data || [];
