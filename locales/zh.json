@@ -1,0 +1,23 @@
+{
+  "title": "WoS SvS 团队注册 - 作者 Pims 🍟",
+  "instructions": "在下方输入您的玩家ID。系统将自动查找您的档案并加载先前的回答。",
+  "playerIdLabel": "玩家 ID",
+  "playerIdPlaceholder": "例如 12345678",
+  "lookupBtn": "检查 ID",
+  "playerNameLabel": "玩家昵称（游戏内）",
+  "playerNamePlaceholder": "例如 ChipsLover",
+  "allianceLabel": "联盟标签",
+  "alliancePlaceholder": "例如 [ABC] Alliance",
+  "infantryLabel": "1. 步兵等级",
+  "lancerLabel": "2. 枪兵等级",
+  "marksmanLabel": "3. 射手等级",
+  "selectPrompt": "-- 请选择等级 --",
+  "submitBtn": "保存 / 更新注册",
+  "savingBtn": "保存中...",
+  "checkingText": "检查中...",
+  "foundMsg": "✨ 已加载先前的档案与数据！",
+  "newMsg": "🔍 新的玩家 ID。请填写您的名称与详细信息。",
+  "successMsg": "✅ 已成功保存至 Supabase 数据库！",
+  "errorMsg": "❌ 保存数据时出错，请检查您的配置。",
+  "footer": "由薯条 🍟 提供支持"
+}
