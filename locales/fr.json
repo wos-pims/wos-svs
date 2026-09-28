@@ -4,7 +4,7 @@
   "playerIdLabel": "ID du joueur",
   "playerIdPlaceholder": "ex. 12345678",
   "lookupBtn": "Vérifier",
-  "playerNameLabel": "Nom du joueur (en jeu)",
+  "playerNameLabel": "Nom du joueur (sur WOS)",
   "playerNamePlaceholder": "ex. AimeLesFrites",
   "allianceLabel": "Tag de l'alliance",
   "alliancePlaceholder": "ex. [ABC] Alliance",
