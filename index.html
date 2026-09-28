@@ -581,7 +581,6 @@
         });
 
         // Fetch settings and player data
-        // Fetch settings and player data
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
             const statusEl = document.getElementById('lookupStatus');
@@ -613,12 +612,13 @@
 
                 if (error) throw error;
 
-                if (response && response.data) {
+                // Check if we got a valid response AND an actual player name back
+                if (response && response.data && response.data.player_name) {
                     const rec = response.data;
-                    nameInput.value = rec.player_name || '';
+                    nameInput.value = rec.player_name;
                     allianceInput.value = rec.alliance_name || '';
 
-                    // Lock them since API succeeded
+                    // Lock them since API succeeded with valid data
                     nameInput.setAttribute('readonly', true);
                     nameInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
                     
@@ -628,21 +628,24 @@
                     statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? t.foundMsg : t.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 } else {
-                    throw new Error("No data returned");
+                    // Trigger manual fallback if data is empty or player name is missing
+                    throw new Error("Player not found in API");
                 }
             } catch (err) {
-                console.warn("Edge function lookup warning/failed:", err);
-                statusEl.textContent = "API offline. Please enter name & tag manually.";
+                console.warn("Edge function lookup warning/non-result:", err);
+                statusEl.textContent = "Player not found. Please enter name & tag manually.";
                 statusEl.className = "text-xs mt-1.5 text-amber-400 h-4";
 
-                // UNLOCK fields so the user can type manually
+                // UNLOCK fields so you can type manually
                 nameInput.removeAttribute('readonly');
                 nameInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 nameInput.placeholder = "Enter your player name";
+                nameInput.value = ""; // Clear out any stale empty values
 
                 allianceInput.removeAttribute('readonly');
                 allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 allianceInput.placeholder = "Enter alliance tag";
+                allianceInput.value = ""; // Clear out any stale empty values
             }
 
             // 2. Pull previously entered troop levels
