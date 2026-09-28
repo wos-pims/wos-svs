@@ -199,6 +199,9 @@
         // Trigger backend API Lookup function
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
+            if (!playerId) return;
+            localStorage.setItem('wos_player_id', playerId);
+            
             const statusEl = document.getElementById('lookupStatus');
             if (!playerId) return;
 
