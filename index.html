@@ -145,9 +145,10 @@
     </footer>
 
     <!-- App Logic Script -->
+    <!-- App Logic Script -->
     <script>
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H'; 
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -199,11 +200,11 @@
         // Trigger backend API Lookup function
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
-            if (!playerId) return;
-            localStorage.setItem('wos_player_id', playerId);
-            
             const statusEl = document.getElementById('lookupStatus');
             if (!playerId) return;
+
+            // Save to localStorage whenever an ID is entered/checked
+            localStorage.setItem('wos_player_id', playerId);
 
             statusEl.textContent = dict.checkingText || "Checking...";
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
@@ -242,9 +243,14 @@
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             const feedbackEl = document.getElementById('formFeedback');
+            const playerId = document.getElementById('playerId').value.trim();
+
+            if (playerId) {
+                localStorage.setItem('wos_player_id', playerId);
+            }
 
             const payload = {
-                player_id: document.getElementById('playerId').value.trim(),
+                player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
                 alliance_name: document.getElementById('allianceName').value.trim(),
                 infantry_level: document.getElementById('infantryLevel').value,
@@ -273,8 +279,14 @@
             submitBtn.textContent = dict.submitBtn || "";
         });
 
-        // Initialize default language on page load
+        // Initialize default language and auto-load saved player ID
         loadLanguage('en');
+
+        const savedPlayerId = localStorage.getItem('wos_player_id');
+        if (savedPlayerId) {
+            document.getElementById('playerId').value = savedPlayerId;
+            fetchPlayerData();
+        }
     </script>
 </body>
 </html>
