@@ -30,14 +30,14 @@
             <div class="flex items-center space-x-2">
                 <span class="text-xs text-slate-400">🌐</span>
                 <select id="langSwitch" class="bg-slate-800 text-slate-200 text-sm rounded-lg border border-slate-700 px-2.5 py-1.5 focus:outline-none focus:border-cyan-500">
-                    <option value="en">🇺🇸 English</option>
-                    <option value="es">🇪🇸 Español</option>
-                    <option value="fr">🇫🇷 Français</option>
-                    <option value="it">🇮🇹 Italiano</option>
-                    <option value="pl">🇵🇱 Polski</option>
-                    <option value="tr">🇹🇷 Türkçe</option>
-                    <option value="ja">🇯🇵 日本語</option>
-                    <option value="zh">🇨🇳 中文</option>
+                    <option value="en">English</option>
+                    <option value="es">Español</option>
+                    <option value="fr">Français</option>
+                    <option value="it">Italiano</option>
+                    <option value="ja">日本語</option>
+                    <option value="pl">Polski</option>
+                    <option value="tr">Türkçe</option>
+                    <option value="zh">中文</option>
                 </select>
             </div>
         </div>
@@ -48,10 +48,10 @@
         <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
             
             <p id="instructionsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
-                Enter your Chief ID to auto-load your profile information, then fill in your combat readiness details for upcoming SvS battles.
+                Enter your Chief ID to auto-load your profile information, then fill in your combat readiness, hero statuses, and castle battle availability.
             </p>
 
-            <form id="svsForm" class="space-y-5">
+            <form id="svsForm" class="space-y-6">
                 
                 <!-- Player ID & Lookup -->
                 <div>
@@ -89,127 +89,102 @@
                     <div>
                         <label id="lblInfantry" class="block text-xs font-medium text-slate-300 mb-1">Infantry Level</label>
                         <select id="infantryLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-                            <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
-                            <option value="FC10 helios">FC10 helios</option>
-                            <option value="FC10">FC10</option>
-                            <option value="FC9 helios">FC9 helios</option>
-                            <option value="FC9">FC9</option>
-                            <option value="FC8 helios">FC8 helios</option>
-                            <option value="FC8">FC8</option>
-                            <option value="FC7">FC7</option>
-                            <option value="FC6">FC6</option>
-                            <option value="FC5">FC5</option>
-                            <option value="FC4">FC4</option>
-                            <option value="FC3">FC3</option>
-                            <option value="FC2">FC2</option>
-                            <option value="FC1">FC1</option>
-                            <option value="not_FC">Under FC1</option>
+                            <option value="" id="optInfantryPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
                         </select>
                     </div>
                     <div>
                         <label id="lblLancer" class="block text-xs font-medium text-slate-300 mb-1">Lancer Level</label>
                         <select id="lancerLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-                            <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
-                            <option value="FC10 helios">FC10 helios</option>
-                            <option value="FC10">FC10</option>
-                            <option value="FC9 helios">FC9 helios</option>
-                            <option value="FC9">FC9</option>
-                            <option value="FC8 helios">FC8 helios</option>
-                            <option value="FC8">FC8</option>
-                            <option value="FC7">FC7</option>
-                            <option value="FC6">FC6</option>
-                            <option value="FC5">FC5</option>
-                            <option value="FC4">FC4</option>
-                            <option value="FC3">FC3</option>
-                            <option value="FC2">FC2</option>
-                            <option value="FC1">FC1</option>
-                            <option value="not_FC">Under FC1</option>
+                            <option value="" id="optLancerPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
                         </select>
                     </div>
                     <div>
                         <label id="lblMarksman" class="block text-xs font-medium text-slate-300 mb-1">Marksman Level</label>
                         <select id="marksmanLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
-                            <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
-                            <option value="FC10 helios">FC10 helios</option>
-                            <option value="FC10">FC10</option>
-                            <option value="FC9 helios">FC9 helios</option>
-                            <option value="FC9">FC9</option>
-                            <option value="FC8 helios">FC8 helios</option>
-                            <option value="FC8">FC8</option>
-                            <option value="FC7">FC7</option>
-                            <option value="FC6">FC6</option>
-                            <option value="FC5">FC5</option>
-                            <option value="FC4">FC4</option>
-                            <option value="FC3">FC3</option>
-                            <option value="FC2">FC2</option>
-                            <option value="FC1">FC1</option>
-                            <option value="not_FC">Under FC1</option>
+                            <option value="" id="optMarksmanPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Heroes Section (5-Star Checkboxes) -->
-                <div class="border-t border-slate-800 pt-5 mt-2">
-                    <label class="block text-sm font-medium text-slate-300 mb-3">
-                        I have these heroes 5 stars:
-                    </label>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_bradley" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Bradley</span>
+                <!-- Heroes Section (5-Star & Skill 5 Checkboxes) -->
+                <div class="border-t border-slate-800 pt-5">
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-medium text-slate-300">
+                            Heroes Status:
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_edith" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Edith</span>
+                        <div class="flex space-x-4 text-xs text-slate-400 font-medium">
+                            <span class="w-12 text-center">5★</span>
+                            <span class="w-16 text-center">Skill 5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2" id="heroListContainer">
+                        <!-- Generated dynamically or listed cleanly -->
+                        <!-- Heroes: Bradley, Edith, Gatot, Hector, Hendricks, Jasser, Jessie, Magnus, Mia, Norah, Patrick, Reina, Renee, Seo-Yoon -->
+                        <div id="heroRows"></div>
+                    </div>
+                </div>
+
+                <!-- Castle Battle Availability Section -->
+                <div class="border-t border-slate-800 pt-5">
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium text-slate-300">
+                            Castle Battle Availability
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_gatot" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Gatot</span>
+                        <p class="text-xs text-cyan-400 mt-0.5" id="battleDateDisplay">Next Battle Date: Loading...</p>
+                    </div>
+
+                    <!-- Participation Type Radio Options -->
+                    <div class="space-y-2.5 mb-4 text-sm text-slate-300">
+                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                            <input type="radio" name="participationType" value="slots" id="typeSlots" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span>Available during specific time slots (select below)</span>
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_hector" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Hector</span>
+                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                            <input type="radio" name="participationType" value="unscheduled" id="typeUnscheduled" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span>Participate (can't tell exact time / flexible)</span>
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_hendricks" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Hendricks</span>
+                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                            <input type="radio" name="participationType" value="on_and_off" id="typeOnOff" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span>On and off</span>
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_jasser" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Jasser</span>
+                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                            <input type="radio" name="participationType" value="none" id="typeNone" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span>Won't participate at all</span>
                         </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_jessie" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Jessie</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_magnus" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Magnus</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_mia" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Mia</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_norah" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Norah</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_patrick" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Patrick</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_reina" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Reina</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_renee" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Renee</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
-                            <input type="checkbox" id="hero_seo_yoon" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
-                            <span>Seo-Yoon</span>
-                        </label>
+                    </div>
+
+                    <!-- Time Slots Checkboxes (12:00 to 17:00 UTC) -->
+                    <div id="timeSlotsContainer" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 space-y-2 hidden">
+                        <span class="block text-xs font-medium text-slate-400 mb-2">Select available 1-hour UTC slots:</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" value="12:00-13:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                                <span>12:00 - 13:00 UTC</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" value="13:00-14:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                                <span>13:00 - 14:00 UTC</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" value="14:00-15:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                                <span>14:00 - 15:00 UTC</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" value="15:00-16:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                                <span>15:00 - 16:00 UTC</span>
+                            </label>
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" value="16:00-17:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                                <span>16:00 - 17:00 UTC</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
 
@@ -229,7 +204,7 @@
 
     <!-- Footer -->
     <footer class="w-full border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-        <p id="footerText">Whiteout Survival SvS Coordination Tool</p>
+        <p id="footerText">Powered by chips 🍟</p>
     </footer>
 
     <!-- Application Script -->
@@ -240,7 +215,46 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let dict = {};
-        const heroKeys = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
+        let currentNextSvsDate = '';
+
+        const heroesList = [
+            'Bradley', 'Edith', 'Gatot', 'Hector', 'Hendricks', 
+            'Jasser', 'Jessie', 'Magnus', 'Mia', 'Norah', 
+            'Patrick', 'Reina', 'Renee', 'Seo-Yoon'
+        ];
+
+        // Render Hero rows dynamically in alphabetical order
+        function renderHeroes() {
+            const container = document.getElementById('heroRows');
+            container.innerHTML = '';
+            heroesList.forEach(heroName => {
+                const key = heroName.toLowerCase().replace('-', '_');
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-800/80 text-xs text-slate-300";
+                row.innerHTML = `
+                    <span class="font-medium">${heroName}</span>
+                    <div class="flex space-x-6 pr-2">
+                        <input type="checkbox" id="hero_${key}_stars" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
+                        <input type="checkbox" id="hero_${key}_skill" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+        renderHeroes();
+
+        // Toggle time slots box visibility based on radio selection
+        document.querySelectorAll('input[name="participationType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const slotsContainer = document.getElementById('timeSlotsContainer');
+                if (e.target.value === 'slots') {
+                    slotsContainer.classList.remove('hidden');
+                } else {
+                    slotsContainer.classList.add('hidden');
+                    document.querySelectorAll('.time-slot-checkbox').forEach(cb => cb.checked = false);
+                }
+            });
+        });
 
         async function loadLanguage(lang) {
             try {
@@ -283,7 +297,7 @@
             loadLanguage(e.target.value);
         });
 
-        // Fetch player data: Calls edge function for Name/Alliance, and queries local tables for form history
+        // Fetch settings and player data
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
             const statusEl = document.getElementById('lookupStatus');
@@ -293,8 +307,18 @@
             statusEl.textContent = dict.checkingText || "Checking...";
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
             
-            // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
             try {
+                // 0. Fetch active next_svs_date from settings table
+                const { data: settingData } = await supabaseClient
+                    .from('settings')
+                    .select('value')
+                    .eq('key', 'next_svs_date')
+                    .maybeSingle();
+
+                currentNextSvsDate = settingData ? settingData.value : 'Unknown Date';
+                document.getElementById('battleDateDisplay').textContent = `Next Battle Date: ${currentNextSvsDate}`;
+
+                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
@@ -306,16 +330,16 @@
                     document.getElementById('playerName').value = rec.player_name || '';
                     document.getElementById('allianceName').value = rec.alliance_name || '';
 
-                    statusEl.textContent = dict.foundMsg || "Found!";
+                    statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? dict.foundMsg : dict.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 }
             } catch (err) {
-                console.warn("Edge function lookup skipped/failed:", err);
+                console.warn("Edge function lookup warning:", err);
                 statusEl.textContent = dict.newMsg || "Manual entry required for profile.";
                 statusEl.className = "text-xs mt-1.5 text-cyan-400 h-4";
             }
 
-            // 2. Pull previously entered form data (Troop Levels) independently
+            // 2. Pull previously entered troop levels
             try {
                 const { data: subData } = await supabaseClient
                     .from('svs_player_submissions')
@@ -333,10 +357,10 @@
                     document.getElementById('marksmanLevel').value = "";
                 }
             } catch (subErr) {
-                console.error("Error loading player submissions:", subErr);
+                console.error("Error loading submissions:", subErr);
             }
 
-            // 3. Pull previously saved hero checklist independently
+            // 3. Pull previously saved hero statuses (stars and skill)
             try {
                 const { data: heroData } = await supabaseClient
                     .from('svs_heroes')
@@ -344,40 +368,73 @@
                     .eq('player_id', playerId)
                     .maybeSingle();
 
-                if (heroData) {
-                    heroKeys.forEach(hero => {
-                        const checkbox = document.getElementById(`hero_${hero}`);
-                        if (checkbox) checkbox.checked = !!heroData[hero];
-                    });
-                } else {
-                    heroKeys.forEach(hero => {
-                        const checkbox = document.getElementById(`hero_${hero}`);
-                        if (checkbox) checkbox.checked = false;
-                    });
-                }
+                heroesList.forEach(heroName => {
+                    const key = heroName.toLowerCase().replace('-', '_');
+                    const starCb = document.getElementById(`hero_${key}_stars`);
+                    const skillCb = document.getElementById(`hero_${key}_skill`);
+                    
+                    if (heroData) {
+                        if (starCb) starCb.checked = !!heroData[`${key}_stars`];
+                        if (skillCb) skillCb.checked = !!heroData[`${key}_skill`];
+                    } else {
+                        if (starCb) starCb.checked = false;
+                        if (skillCb) skillCb.checked = false;
+                    }
+                });
             } catch (heroErr) {
-                console.error("Error loading hero checklist:", heroErr);
+                console.error("Error loading heroes:", heroErr);
+            }
+
+            // 4. Pull availability ONLY if battle_date matches currentNextSvsDate
+            try {
+                const { data: availData } = await supabaseClient
+                    .from('svs_availability')
+                    .select('*')
+                    .eq('player_id', playerId)
+                    .eq('battle_date', currentNextSvsDate)
+                    .maybeSingle();
+
+                // Reset availability form first
+                document.querySelectorAll('input[name="participationType"]').forEach(r => r.checked = false);
+                document.getElementById('timeSlotsContainer').classList.add('hidden');
+                document.querySelectorAll('.time-slot-checkbox').forEach(cb => cb.checked = false);
+
+                if (availData) {
+                    const typeRadio = document.querySelector(`input[name="participationType"][value="${availData.participation_type}"]`);
+                    if (typeRadio) {
+                        typeRadio.checked = true;
+                        if (availData.participation_type === 'slots') {
+                            document.getElementById('timeSlotsContainer').classList.remove('hidden');
+                            if (availData.time_slots && Array.isArray(availData.time_slots)) {
+                                document.querySelectorAll('.time-slot-checkbox').forEach(cb => {
+                                    if (availData.time_slots.includes(cb.value)) cb.checked = true;
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (availErr) {
+                console.error("Error loading availability:", availErr);
             }
         }
 
         document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
         document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
 
-        // Form Submission handler (Upserts to both submission and hero tables)
+        // Form Submission handler (Upserts to all 3 tables)
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             const feedbackEl = document.getElementById('formFeedback');
-            const playerId = document.getElementById('playerId').value.trim();
+            const playerId = Number(document.getElementById('playerId').value.trim());
 
-            if (playerId) {
-                localStorage.setItem('wos_player_id', playerId);
-            }
+            if (!playerId) return;
+            localStorage.setItem('wos_player_id', playerId);
 
             submitBtn.disabled = true;
             submitBtn.textContent = dict.savingBtn || "Saving...";
 
-            // 1. Save submission data (Troop levels & read-only name/alliance)
+            // 1. Save submission data
             const payload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
@@ -392,25 +449,48 @@
                 .from('svs_player_submissions')
                 .upsert(payload, { onConflict: 'player_id' });
 
-            // 2. Save hero selections
+            // 2. Save hero selections (stars & skill 5)
             const heroPayload = {
                 player_id: playerId,
                 updated_at: new Date()
             };
-            heroKeys.forEach(hero => {
-                heroPayload[hero] = document.getElementById(`hero_${hero}`).checked;
+            heroesList.forEach(heroName => {
+                const key = heroName.toLowerCase().replace('-', '_');
+                heroPayload[`${key}_stars`] = document.getElementById(`hero_${key}_stars`).checked;
+                heroPayload[`${key}_skill`] = document.getElementById(`hero_${key}_skill`).checked;
             });
 
             const { error: heroError } = await supabaseClient
                 .from('svs_heroes')
                 .upsert(heroPayload, { onConflict: 'player_id' });
 
-            if (subError || heroError) {
-                console.error(subError || heroError);
-                feedbackEl.textContent = dict.errorMsg || "Error saving data.";
+            // 3. Save Castle Battle Availability tied to currentNextSvsDate
+            const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
+            let selectedSlots = [];
+            if (selectedType === 'slots') {
+                document.querySelectorAll('.time-slot-checkbox:checked').forEach(cb => {
+                    selectedSlots.push(cb.value);
+                });
+            }
+
+            const availPayload = {
+                player_id: playerId,
+                battle_date: currentNextSvsDate,
+                participation_type: selectedType,
+                time_slots: selectedSlots,
+                updated_at: new Date()
+            };
+
+            const { error: availError } = await supabaseClient
+                .from('svs_availability')
+                .upsert(availPayload, { onConflict: 'player_id,battle_date' });
+
+            if (subError || heroError || availError) {
+                console.error(subError || heroError || availError);
+                feedbackEl.textContent = "Error saving data. Please check configuration.";
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
             } else {
-                feedbackEl.textContent = dict.successMsg || "Saved successfully!";
+                feedbackEl.textContent = "Saved successfully!";
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
             }
 
