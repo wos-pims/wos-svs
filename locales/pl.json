@@ -1,0 +1,23 @@
+{
+  "title": "Rejestracja Drużyny SvS WoS - od Pims 🍟",
+  "instructions": "Wpisz poniżej swój identyfikator gracza (Player ID). System wyszuka Twój profil i automatycznie wczyta poprzednie odpowiedzi.",
+  "playerIdLabel": "ID gracza",
+  "playerIdPlaceholder": "np. 12345678",
+  "lookupBtn": "Sprawdź ID",
+  "playerNameLabel": "Nazwa gracza (w grze)",
+  "playerNamePlaceholder": "np. ChipsLover",
+  "allianceLabel": "Tag sojuszu",
+  "alliancePlaceholder": "np. [ABC] Sojusz",
+  "infantryLabel": "1. Poziom piechoty",
+  "lancerLabel": "2. Poziom lansjerów",
+  "marksmanLabel": "3. Poziom strzelców wyborowych",
+  "selectPrompt": "-- Wybierz poziom --",
+  "submitBtn": "Zapisz / Zaktualizuj rejestrację",
+  "savingBtn": "Zapisywanie...",
+  "checkingText": "Sprawdzanie...",
+  "foundMsg": "✨ Wczytano poprzedni profil i dane!",
+  "newMsg": "🔍 Nowe ID gracza. Wprowadź swoje imię i szczegóły.",
+  "successMsg": "✅ Pomyślnie zapisano w bazie danych Supabase!",
+  "errorMsg": "❌ Błąd podczas zapisu danych. Sprawdź konfigurację.",
+  "footer": "Wspierane przez frytki 🍟"
+}
