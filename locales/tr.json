@@ -1,0 +1,23 @@
+{
+  "title": "WoS SvS Takım Kaydı - Pims 🍟",
+  "instructions": "Aşağıya Oyuncu Kimliğinizi (Player ID) girin. Sistem profilinizi arayacak ve önceki yanıtlarınızı otomatik olarak yükleyecektir.",
+  "playerIdLabel": "Oyuncu ID",
+  "playerIdPlaceholder": "örn. 12345678",
+  "lookupBtn": "ID Kontrol Et",
+  "playerNameLabel": "Oyuncu Adı (Oyun içi)",
+  "playerNamePlaceholder": "örn. ChipsLover",
+  "allianceLabel": "İttifak Etiketi",
+  "alliancePlaceholder": "örn. [ABC] İttifakı",
+  "infantryLabel": "1. Piyade Seviyesi",
+  "lancerLabel": "2. Süvari Seviyesi",
+  "marksmanLabel": "3. Nişancı Seviyesi",
+  "selectPrompt": "-- Seviye Seçin --",
+  "submitBtn": "Kaydı Kaydet / Güncelle",
+  "savingBtn": "Kaydediliyor...",
+  "checkingText": "Kontrol ediliyor...",
+  "foundMsg": "✨ Önceki profil ve veriler yüklendi!",
+  "newMsg": "🔍 Yeni Oyuncu ID. Lütfen adınızı ve detayları girin.",
+  "successMsg": "✅ Supabase veritabanına başarıyla kaydedildi!",
+  "errorMsg": "❌ Veri kaydetme hatası. Lütfen yapılandırmanızı kontrol edin.",
+  "footer": "Chips ile güçlendirilmiştir 🍟"
+}
