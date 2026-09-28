@@ -1,0 +1,23 @@
+{
+  "title": "Registrazione Squadra SvS WoS - di Pims 🍟",
+  "instructions": "Inserisci il tuo ID giocatore qui sotto. Il sistema cercherà il tuo profilo e caricherà automaticamente le tue risposte precedenti.",
+  "playerIdLabel": "ID Giocatore",
+  "playerIdPlaceholder": "es. 12345678",
+  "lookupBtn": "Verifica ID",
+  "playerNameLabel": "Nome Giocatore (in-game)",
+  "playerNamePlaceholder": "es. ChipsLover",
+  "allianceLabel": "Tag Alleanza",
+  "alliancePlaceholder": "es. [ABC] Alleanza",
+  "infantryLabel": "1. Livello Fanteria",
+  "lancerLabel": "2. Livello Lanciere",
+  "marksmanLabel": "3. Livello Tiratore",
+  "selectPrompt": "-- Seleziona Livello --",
+  "submitBtn": "Salva / Aggiorna Registrazione",
+  "savingBtn": "Salvataggio...",
+  "checkingText": "Verifica in corso...",
+  "foundMsg": "✨ Profilo precedente e dati caricati!",
+  "newMsg": "🔍 Nuovo ID Giocatore. Inserisci nome e dettagli.",
+  "successMsg": "✅ Salvato con successo nel database Supabase!",
+  "errorMsg": "❌ Errore durante il salvataggio. Controlla la configurazione.",
+  "footer": "Offerto da chips 🍟"
+}
