@@ -1,162 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title id="pageTitle">2056 SvS Team Registration - by Pims 🍟</title>
+    <title id="pageTitle">WoS SvS Team Registration - by Pims 🍟</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Supabase JS SDK -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#0ea5e9', 600: '#0284c7' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
 
-    <!-- Header & Language Switcher -->
-    <header class="w-full bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center shadow-md">
-        <h1 id="headerTitle" class="text-xl font-bold tracking-wide text-cyan-400">WoS SvS Team Registration - by Pims 🍟</h1>
-        <div class="flex items-center space-x-2">
-            <span class="text-sm text-slate-400">🌐</span>
-            <select id="langSwitch" class="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-cyan-400">
-                <option value="en">English</option>
-                <option value="es">Español</option>
-                <option value="fr">Français</option>
-                <option value="it">Italiano</option>
-                <option value="ja">日本語</option>
-                <option value="pl">Polski</option>
-                <option value="tr">Türkçe</option>
-                <option value="zh">中文</option>
-            </select>
+    <!-- Header & Language Selector -->
+    <header class="w-full border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 id="headerTitle" class="font-bold text-lg text-cyan-400 tracking-wide">WoS SvS Team Registration - by Pims 🍟</h1>
+            <div class="flex items-center space-x-2">
+                <span class="text-xs text-slate-400">🌐</span>
+                <select id="langSwitch" class="bg-slate-800 text-slate-200 text-sm rounded-lg border border-slate-700 px-2.5 py-1.5 focus:outline-none focus:border-cyan-500">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pl">🇵🇱 Polski</option>
+                    <option value="tr">🇹🇷 Türkçe</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+            </div>
         </div>
     </header>
 
-    <!-- Main Form Container -->
-    <main class="max-w-xl mx-auto w-full p-6 my-auto">
-        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
-            <p id="instructionsText" class="text-sm text-slate-400 mb-6">
-                Enter your Player ID below.
+    <!-- Main Container -->
+    <main class="max-w-xl mx-auto px-4 py-8 w-full flex-grow">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+            
+            <p id="instructionsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
+                Enter your Chief ID to auto-load your profile information, then fill in your combat readiness details for upcoming SvS battles.
             </p>
 
-            <form id="svsForm" class="space-y-4">
-                <!-- Player ID Input -->
+            <form id="svsForm" class="space-y-5">
+                
+                <!-- Player ID & Lookup -->
                 <div>
-                    <label id="lblPlayerId" class="block text-sm font-medium mb-1 text-slate-300">Player ID</label>
-                    <div class="flex space-x-2">
-                        <input type="text" id="playerId" required 
-                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
-                        <button type="button" id="lookupBtn" class="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg text-sm font-medium transition-colors">Check ID</button>
+                    <label id="lblPlayerId" class="block text-sm font-medium text-slate-300 mb-1.5">Player Chief ID</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="playerId" required 
+                            class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. 295897829">
+                        <button type="button" id="lookupBtn" 
+                            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-sm px-4 py-2.5 rounded-lg transition-colors">
+                            Check ID
+                        </button>
                     </div>
-                    <p id="lookupStatus" class="text-xs mt-1.5 h-4"></p>
+                    <div id="lookupStatus" class="text-xs mt-1.5 text-slate-400 h-4"></div>
                 </div>
 
-                <!-- Player Name -->
+                <!-- Player Name (Auto-fetched) -->
                 <div>
-                    <label id="lblPlayerName" class="block text-sm font-medium mb-1 text-slate-300">Player Name (In-game)</label>
-                    <input type="text" id="playerName" required 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                    <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
+                    <input type="text" id="playerName" readonly 
+                        class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                        placeholder="Auto-filled via Check ID">
                 </div>
 
-                <!-- Alliance Name -->
+                <!-- Alliance Name (Auto-fetched Tag) -->
                 <div>
-                    <label id="lblAlliance" class="block text-sm font-medium mb-1 text-slate-300">Alliance Tag</label>
-                    <input type="text" id="allianceName" required 
-                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                    <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
+                    <input type="text" id="allianceName" readonly 
+                        class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                        placeholder="Auto-filled via Check ID">
                 </div>
 
-                <hr class="border-slate-700 my-2">
-
-                <!-- 1. Infantry Level -->
-                <div>
-                    <label id="lblInfantry" class="block text-sm font-medium mb-1 text-slate-300">1. Infantry Level</label>
-                    <select id="infantryLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
-                        <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
-                        <option value="FC10 helios">FC10 helios</option>
-                        <option value="FC10">FC10</option>
-                        <option value="FC9 helios">FC9 helios</option>
-                        <option value="FC9">FC9</option>
-                        <option value="FC8 helios">FC8 helios</option>
-                        <option value="FC8">FC8</option>
-                        <option value="FC7">FC7</option>
-                        <option value="FC6">FC6</option>
-                        <option value="FC5">FC5</option>
-                        <option value="FC4">FC4</option>
-                        <option value="FC3">FC3</option>
-                        <option value="FC2">FC2</option>
-                        <option value="FC1">FC1</option>
-                        <option value="not_FC">Under FC1</option>
-                    </select>
+                <!-- Troop Levels Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div>
+                        <label id="lblInfantry" class="block text-xs font-medium text-slate-300 mb-1">Infantry Level</label>
+                        <select id="infantryLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="" id="optInfantryPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label id="lblLancer" class="block text-xs font-medium text-slate-300 mb-1">Lancer Level</label>
+                        <select id="lancerLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="" id="optLancerPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label id="lblMarksman" class="block text-xs font-medium text-slate-300 mb-1">Marksman Level</label>
+                        <select id="marksmanLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="" id="optMarksmanPrompt">Select...</option>
+                            <option value="T10">T10</option>
+                            <option value="T11">T11</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- 2. Lancer Level -->
-                <div>
-                    <label id="lblLancer" class="block text-sm font-medium mb-1 text-slate-300">2. Lancer Level</label>
-                    <select id="lancerLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
-                        <option value="" disabled selected id="optLancerPrompt">-- Select Level --</option>
-                        <option value="FC10 helios">FC10 helios</option>
-                        <option value="FC10">FC10</option>
-                        <option value="FC9 helios">FC9 helios</option>
-                        <option value="FC9">FC9</option>
-                        <option value="FC8 helios">FC8 helios</option>
-                        <option value="FC8">FC8</option>
-                        <option value="FC7">FC7</option>
-                        <option value="FC6">FC6</option>
-                        <option value="FC5">FC5</option>
-                        <option value="FC4">FC4</option>
-                        <option value="FC3">FC3</option>
-                        <option value="FC2">FC2</option>
-                        <option value="FC1">FC1</option>
-                        <option value="not_FC">Under FC1</option>
-                    </select>
-                </div>
-
-                <!-- 3. Marksman Level -->
-                <div>
-                    <label id="lblMarksman" class="block text-sm font-medium mb-1 text-slate-300">3. Marksman Level</label>
-                    <select id="marksmanLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
-                        <option value="" disabled selected id="optMarksmanPrompt">-- Select Level --</option>
-                        <option value="FC10 helios">FC10 helios</option>
-                        <option value="FC10">FC10</option>
-                        <option value="FC9 helios">FC9 helios</option>
-                        <option value="FC9">FC9</option>
-                        <option value="FC8 helios">FC8 helios</option>
-                        <option value="FC8">FC8</option>
-                        <option value="FC7">FC7</option>
-                        <option value="FC6">FC6</option>
-                        <option value="FC5">FC5</option>
-                        <option value="FC4">FC4</option>
-                        <option value="FC3">FC3</option>
-                        <option value="FC2">FC2</option>
-                        <option value="FC1">FC1</option>
-                        <option value="not_FC">Under FC1</option>
-                    </select>
+                <!-- Heroes Section (5-Star Checkboxes) -->
+                <div class="border-t border-slate-800 pt-5 mt-2">
+                    <label class="block text-sm font-medium text-slate-300 mb-3">
+                        I have these heroes 5 stars:
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_bradley" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Bradley</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_edith" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Edith</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_gatot" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Gatot</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_hector" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Hector</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_hendricks" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Hendricks</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_jasser" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Jasser</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_jessie" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Jessie</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_magnus" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Magnus</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_mia" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Mia</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_norah" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Norah</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_patrick" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Patrick</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_reina" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Reina</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_renee" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Renee</span>
+                        </label>
+                        <label class="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer bg-slate-950/40 p-2 rounded-lg border border-slate-800/80 hover:border-slate-700 transition-colors">
+                            <input type="checkbox" id="hero_seo_yoon" class="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                            <span>Seo-Yoon</span>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" id="submitBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors shadow-lg mt-2">
-                    Save / Update Registration
-                </button>
-            </form>
+                <div class="pt-2">
+                    <button type="submit" id="submitBtn" 
+                        class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm py-3 rounded-lg shadow-lg shadow-cyan-900/30 transition-all">
+                        Submit Registration
+                    </button>
+                </div>
 
-            <div id="formFeedback" class="mt-4 text-center text-sm font-medium h-6"></div>
+                <div id="formFeedback" class="text-center text-sm font-medium h-6"></div>
+
+            </form>
         </div>
     </main>
 
-    <footer id="footerText" class="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-800">
-        Powered by chips 🍟
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p id="footerText">Whiteout Survival SvS Coordination Tool</p>
     </footer>
 
-    <!-- App Logic Script -->
-    <!-- App Logic Script -->
+    <!-- Application Script -->
     <script>
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; 
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let dict = {};
-        let currentLang = 'en';
+        const heroKeys = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
 
         async function loadLanguage(lang) {
-            currentLang = lang;
             try {
                 const response = await fetch(`./locales/${lang}.json`);
                 dict = await response.json();
@@ -167,49 +217,48 @@
         }
 
         function applyTranslations() {
-            document.getElementById('pageTitle').textContent = dict.title || "";
-            document.getElementById('headerTitle').textContent = dict.title || "";
+            document.getElementById('pageTitle').textContent = dict.title || "Whiteout Survival - SvS Registration";
+            document.getElementById('headerTitle').textContent = dict.title || "SvS Registration";
             document.getElementById('instructionsText').textContent = dict.instructions || "";
             
-            document.getElementById('lblPlayerId').textContent = dict.playerIdLabel || "";
-            document.getElementById('playerId').placeholder = dict.playerIdPlaceholder || "";
-            document.getElementById('lookupBtn').textContent = dict.lookupBtn || "";
+            document.getElementById('lblPlayerId').textContent = dict.playerIdLabel || "Player Chief ID";
+            document.getElementById('playerId').placeholder = dict.playerIdPlaceholder || "e.g. 295897829";
+            document.getElementById('lookupBtn').textContent = dict.lookupBtn || "Check ID";
 
-            document.getElementById('lblPlayerName').textContent = dict.playerNameLabel || "";
-            document.getElementById('playerName').placeholder = dict.playerNamePlaceholder || "";
+            document.getElementById('lblPlayerName').textContent = dict.playerNameLabel || "Player Name";
+            document.getElementById('playerName').placeholder = dict.playerNamePlaceholder || "Auto-filled via Check ID";
 
-            document.getElementById('lblAlliance').textContent = dict.allianceLabel || "";
-            document.getElementById('allianceName').placeholder = dict.alliancePlaceholder || "";
+            document.getElementById('lblAlliance').textContent = dict.allianceLabel || "Alliance Tag";
+            document.getElementById('allianceName').placeholder = dict.alliancePlaceholder || "Auto-filled via Check ID";
 
-            document.getElementById('lblInfantry').textContent = dict.infantryLabel || "";
-            document.getElementById('lblLancer').textContent = dict.lancerLabel || "";
-            document.getElementById('lblMarksman').textContent = dict.marksmanLabel || "";
+            document.getElementById('lblInfantry').textContent = dict.infantryLabel || "Infantry Level";
+            document.getElementById('lblLancer').textContent = dict.lancerLabel || "Lancer Level";
+            document.getElementById('lblMarksman').textContent = dict.marksmanLabel || "Marksman Level";
 
-            document.getElementById('optInfantryPrompt').textContent = dict.selectPrompt || "";
-            document.getElementById('optLancerPrompt').textContent = dict.selectPrompt || "";
-            document.getElementById('optMarksmanPrompt').textContent = dict.selectPrompt || "";
+            document.getElementById('optInfantryPrompt').textContent = dict.selectPrompt || "Select...";
+            document.getElementById('optLancerPrompt').textContent = dict.selectPrompt || "Select...";
+            document.getElementById('optMarksmanPrompt').textContent = dict.selectPrompt || "Select...";
 
-            document.getElementById('submitBtn').textContent = dict.submitBtn || "";
-            document.getElementById('footerText').textContent = dict.footer || "";
+            document.getElementById('submitBtn').textContent = dict.submitBtn || "Submit Registration";
+            document.getElementById('footerText').textContent = dict.footer || "Whiteout Survival SvS Coordination Tool";
         }
 
         document.getElementById('langSwitch').addEventListener('change', (e) => {
             loadLanguage(e.target.value);
         });
 
-        // Trigger backend API Lookup function
+        // Fetch player data: Calls edge function for Name/Alliance, and queries local tables for form history
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
             const statusEl = document.getElementById('lookupStatus');
             if (!playerId) return;
 
-            // Save to localStorage whenever an ID is entered/checked
             localStorage.setItem('wos_player_id', playerId);
-
             statusEl.textContent = dict.checkingText || "Checking...";
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
             
             try {
+                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
@@ -220,14 +269,47 @@
                     const rec = response.data;
                     document.getElementById('playerName').value = rec.player_name || '';
                     document.getElementById('allianceName').value = rec.alliance_name || '';
-                    
-                    if (rec.infantry_level) document.getElementById('infantryLevel').value = rec.infantry_level;
-                    if (rec.lancer_level) document.getElementById('lancerLevel').value = rec.lancer_level;
-                    if (rec.marksman_level) document.getElementById('marksmanLevel').value = rec.marksman_level;
 
-                    statusEl.textContent = response.source === 'database' ? dict.foundMsg : dict.newMsg;
+                    statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? dict.foundMsg : dict.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 }
+
+                // 2. Pull previously entered form data (Troop Levels) from svs_player_submissions
+                const { data: subData } = await supabaseClient
+                    .from('svs_player_submissions')
+                    .select('*')
+                    .eq('player_id', playerId)
+                    .maybeSingle();
+
+                if (subData) {
+                    document.getElementById('infantryLevel').value = subData.infantry_level || "";
+                    document.getElementById('lancerLevel').value = subData.lancer_level || "";
+                    document.getElementById('marksmanLevel').value = subData.marksman_level || "";
+                } else {
+                    document.getElementById('infantryLevel').value = "";
+                    document.getElementById('lancerLevel').value = "";
+                    document.getElementById('marksmanLevel').value = "";
+                }
+
+                // 3. Pull previously saved hero checklist from svs_heroes
+                const { data: heroData } = await supabaseClient
+                    .from('svs_heroes')
+                    .select('*')
+                    .eq('player_id', playerId)
+                    .maybeSingle();
+
+                if (heroData) {
+                    heroKeys.forEach(hero => {
+                        const checkbox = document.getElementById(`hero_${hero}`);
+                        if (checkbox) checkbox.checked = !!heroData[hero];
+                    });
+                } else {
+                    heroKeys.forEach(hero => {
+                        const checkbox = document.getElementById(`hero_${hero}`);
+                        if (checkbox) checkbox.checked = false;
+                    });
+                }
+
             } catch (err) {
                 console.error(err);
                 statusEl.textContent = dict.newMsg || "";
@@ -238,7 +320,7 @@
         document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
         document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
 
-        // Form Submission handler (Upsert to Supabase)
+        // Form Submission handler (Upserts to both submission and hero tables)
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -249,6 +331,10 @@
                 localStorage.setItem('wos_player_id', playerId);
             }
 
+            submitBtn.disabled = true;
+            submitBtn.textContent = dict.savingBtn || "Saving...";
+
+            // 1. Save submission data (Troop levels & read-only name/alliance)
             const payload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
@@ -259,27 +345,37 @@
                 updated_at: new Date()
             };
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = dict.savingBtn || "Saving...";
-
-            const { error } = await supabaseClient
+            const { error: subError } = await supabaseClient
                 .from('svs_player_submissions')
                 .upsert(payload, { onConflict: 'player_id' });
 
-            if (error) {
-                console.error(error);
-                feedbackEl.textContent = dict.errorMsg || "";
+            // 2. Save hero selections
+            const heroPayload = {
+                player_id: playerId,
+                updated_at: new Date()
+            };
+            heroKeys.forEach(hero => {
+                heroPayload[hero] = document.getElementById(`hero_${hero}`).checked;
+            });
+
+            const { error: heroError } = await supabaseClient
+                .from('svs_heroes')
+                .upsert(heroPayload, { onConflict: 'player_id' });
+
+            if (subError || heroError) {
+                console.error(subError || heroError);
+                feedbackEl.textContent = dict.errorMsg || "Error saving data.";
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
             } else {
-                feedbackEl.textContent = dict.successMsg || "";
+                feedbackEl.textContent = dict.successMsg || "Saved successfully!";
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
             }
 
             submitBtn.disabled = false;
-            submitBtn.textContent = dict.submitBtn || "";
+            submitBtn.textContent = dict.submitBtn || "Submit Registration";
         });
 
-        // Initialize default language and auto-load saved player ID
+        // Initialize language and check for remembered ID on startup
         loadLanguage('en');
 
         const savedPlayerId = localStorage.getItem('wos_player_id');
