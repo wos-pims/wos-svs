@@ -1,0 +1,23 @@
+{
+  "title": "Registro de equipo SvS WoS - por Pims 🍟",
+  "instructions": "Introduce tu ID de jugador a continuación. El sistema buscará tu perfil y cargará tus respuestas anteriores automáticamente.",
+  "playerIdLabel": "ID de jugador",
+  "playerIdPlaceholder": "ej. 12345678",
+  "lookupBtn": "Comprobar ID",
+  "playerNameLabel": "Nombre del jugador (en el juego)",
+  "playerNamePlaceholder": "ej. ChipsLover",
+  "allianceLabel": "Etiqueta de alianza",
+  "alliancePlaceholder": "ej. [ABC] Alianza",
+  "infantryLabel": "1. Nivel de Infantería",
+  "lancerLabel": "2. Nivel de Lancero",
+  "marksmanLabel": "3. Nivel de Tirador",
+  "selectPrompt": "-- Seleccionar nivel --",
+  "submitBtn": "Guardar / Actualizar registro",
+  "savingBtn": "Guardando...",
+  "checkingText": "Comprobando...",
+  "foundMsg": "✨ ¡Perfil y datos anteriores cargados!",
+  "newMsg": "🔍 Nuevo ID de jugador. Por favor, introduce tu nombre y detalles.",
+  "successMsg": "✅ ¡Guardado con éxito en la base de datos de Supabase!",
+  "errorMsg": "❌ Error al guardar los datos. Comprueba tu configuración.",
+  "footer": "Desarrollado con chips 🍟"
+}
