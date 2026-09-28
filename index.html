@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">WoS SvS Team Registration - by Pims 🍟</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header & Language Switcher -->
+    <header class="w-full bg-slate-800 border-b border-slate-700 py-4 px-6 flex justify-between items-center shadow-md">
+        <h1 id="headerTitle" class="text-xl font-bold tracking-wide text-cyan-400">WoS SvS Team Registration - by Pims 🍟</h1>
+        <div class="flex items-center space-x-2">
+            <span class="text-sm text-slate-400">🌐</span>
+            <select id="langSwitch" class="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-sm focus:outline-none focus:border-cyan-400">
+                <option value="en">English</option>
+                <option value="es">Español</option>
+                <option value="fr">Français</option>
+                <option value="it">Italiano</option>
+                <option value="ja">日本語</option>
+                <option value="pl">Polski</option>
+                <option value="tr">Türkçe</option>
+                <option value="zh">中文</option>
+            </select>
+        </div>
+    </header>
+
+    <!-- Main Form Container -->
+    <main class="max-w-xl mx-auto w-full p-6 my-auto">
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
+            <p id="instructionsText" class="text-sm text-slate-400 mb-6">
+                Enter your Player ID below.
+            </p>
+
+            <form id="svsForm" class="space-y-4">
+                <!-- Player ID Input -->
+                <div>
+                    <label id="lblPlayerId" class="block text-sm font-medium mb-1 text-slate-300">Player ID</label>
+                    <div class="flex space-x-2">
+                        <input type="text" id="playerId" required 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                        <button type="button" id="lookupBtn" class="bg-slate-700 hover:bg-slate-600 px-4 rounded-lg text-sm font-medium transition-colors">Check ID</button>
+                    </div>
+                    <p id="lookupStatus" class="text-xs mt-1.5 h-4"></p>
+                </div>
+
+                <!-- Player Name -->
+                <div>
+                    <label id="lblPlayerName" class="block text-sm font-medium mb-1 text-slate-300">Player Name (In-game)</label>
+                    <input type="text" id="playerName" required 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                </div>
+
+                <!-- Alliance Name -->
+                <div>
+                    <label id="lblAlliance" class="block text-sm font-medium mb-1 text-slate-300">Alliance Tag</label>
+                    <input type="text" id="allianceName" required 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                </div>
+
+                <hr class="border-slate-700 my-2">
+
+                <!-- 1. Infantry Level -->
+                <div>
+                    <label id="lblInfantry" class="block text-sm font-medium mb-1 text-slate-300">1. Infantry Level</label>
+                    <select id="infantryLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                        <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
+                        <option value="FC10 helios">FC10 helios</option>
+                        <option value="FC10">FC10</option>
+                        <option value="FC9 helios">FC9 helios</option>
+                        <option value="FC9">FC9</option>
+                        <option value="FC8 helios">FC8 helios</option>
+                        <option value="FC8">FC8</option>
+                        <option value="FC7">FC7</option>
+                        <option value="FC6">FC6</option>
+                        <option value="FC5">FC5</option>
+                        <option value="FC4">FC4</option>
+                        <option value="FC3">FC3</option>
+                        <option value="FC2">FC2</option>
+                        <option value="FC1">FC1</option>
+                        <option value="not_FC">Under FC1</option>
+                    </select>
+                </div>
+
+                <!-- 2. Lancer Level -->
+                <div>
+                    <label id="lblLancer" class="block text-sm font-medium mb-1 text-slate-300">2. Lancer Level</label>
+                    <select id="lancerLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                        <option value="" disabled selected id="optLancerPrompt">-- Select Level --</option>
+                        <option value="FC10 helios">FC10 helios</option>
+                        <option value="FC10">FC10</option>
+                        <option value="FC9 helios">FC9 helios</option>
+                        <option value="FC9">FC9</option>
+                        <option value="FC8 helios">FC8 helios</option>
+                        <option value="FC8">FC8</option>
+                        <option value="FC7">FC7</option>
+                        <option value="FC6">FC6</option>
+                        <option value="FC5">FC5</option>
+                        <option value="FC4">FC4</option>
+                        <option value="FC3">FC3</option>
+                        <option value="FC2">FC2</option>
+                        <option value="FC1">FC1</option>
+                        <option value="not_FC">Under FC1</option>
+                    </select>
+                </div>
+
+                <!-- 3. Marksman Level -->
+                <div>
+                    <label id="lblMarksman" class="block text-sm font-medium mb-1 text-slate-300">3. Marksman Level</label>
+                    <select id="marksmanLevel" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-cyan-400">
+                        <option value="" disabled selected id="optMarksmanPrompt">-- Select Level --</option>
+                        <option value="FC10 helios">FC10 helios</option>
+                        <option value="FC10">FC10</option>
+                        <option value="FC9 helios">FC9 helios</option>
+                        <option value="FC9">FC9</option>
+                        <option value="FC8 helios">FC8 helios</option>
+                        <option value="FC8">FC8</option>
+                        <option value="FC7">FC7</option>
+                        <option value="FC6">FC6</option>
+                        <option value="FC5">FC5</option>
+                        <option value="FC4">FC4</option>
+                        <option value="FC3">FC3</option>
+                        <option value="FC2">FC2</option>
+                        <option value="FC1">FC1</option>
+                        <option value="not_FC">Under FC1</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium py-3 rounded-lg transition-colors shadow-lg mt-2">
+                    Save / Update Registration
+                </button>
+            </form>
+
+            <div id="formFeedback" class="mt-4 text-center text-sm font-medium h-6"></div>
+        </div>
+    </main>
+
+    <footer id="footerText" class="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-800">
+        Powered by chips 🍟
+    </footer>
+
+    <!-- App Logic Script -->
+    <script>
+        const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H'; 
+
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let dict = {};
+        let currentLang = 'en';
+
+        async function loadLanguage(lang) {
+            currentLang = lang;
+            try {
+                const response = await fetch(`./locales/${lang}.json`);
+                dict = await response.json();
+                applyTranslations();
+            } catch (err) {
+                console.error("Could not load localization file", err);
+            }
+        }
+
+        function applyTranslations() {
+            document.getElementById('pageTitle').textContent = dict.title || "";
+            document.getElementById('headerTitle').textContent = dict.title || "";
+            document.getElementById('instructionsText').textContent = dict.instructions || "";
+            
+            document.getElementById('lblPlayerId').textContent = dict.playerIdLabel || "";
+            document.getElementById('playerId').placeholder = dict.playerIdPlaceholder || "";
+            document.getElementById('lookupBtn').textContent = dict.lookupBtn || "";
+
+            document.getElementById('lblPlayerName').textContent = dict.playerNameLabel || "";
+            document.getElementById('playerName').placeholder = dict.playerNamePlaceholder || "";
+
+            document.getElementById('lblAlliance').textContent = dict.allianceLabel || "";
+            document.getElementById('allianceName').placeholder = dict.alliancePlaceholder || "";
+
+            document.getElementById('lblInfantry').textContent = dict.infantryLabel || "";
+            document.getElementById('lblLancer').textContent = dict.lancerLabel || "";
+            document.getElementById('lblMarksman').textContent = dict.marksmanLabel || "";
+
+            document.getElementById('optInfantryPrompt').textContent = dict.selectPrompt || "";
+            document.getElementById('optLancerPrompt').textContent = dict.selectPrompt || "";
+            document.getElementById('optMarksmanPrompt').textContent = dict.selectPrompt || "";
+
+            document.getElementById('submitBtn').textContent = dict.submitBtn || "";
+            document.getElementById('footerText').textContent = dict.footer || "";
+        }
+
+        document.getElementById('langSwitch').addEventListener('change', (e) => {
+            loadLanguage(e.target.value);
+        });
+
+        // Trigger backend API Lookup function
+        async function fetchPlayerData() {
+            const playerId = document.getElementById('playerId').value.trim();
+            const statusEl = document.getElementById('lookupStatus');
+            if (!playerId) return;
+
+            statusEl.textContent = dict.checkingText || "Checking...";
+            statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
+            
+            try {
+                const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
+                    body: { player_id: playerId }
+                });
+
+                if (error) throw error;
+
+                if (response && response.data) {
+                    const rec = response.data;
+                    document.getElementById('playerName').value = rec.player_name || '';
+                    document.getElementById('allianceName').value = rec.alliance_name || '';
+                    
+                    if (rec.infantry_level) document.getElementById('infantryLevel').value = rec.infantry_level;
+                    if (rec.lancer_level) document.getElementById('lancerLevel').value = rec.lancer_level;
+                    if (rec.marksman_level) document.getElementById('marksmanLevel').value = rec.marksman_level;
+
+                    statusEl.textContent = response.source === 'database' ? dict.foundMsg : dict.newMsg;
+                    statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
+                }
+            } catch (err) {
+                console.error(err);
+                statusEl.textContent = dict.newMsg || "";
+                statusEl.className = "text-xs mt-1.5 text-cyan-400 h-4";
+            }
+        }
+
+        document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
+        document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
+
+        // Form Submission handler (Upsert to Supabase)
+        document.getElementById('svsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const feedbackEl = document.getElementById('formFeedback');
+
+            const payload = {
+                player_id: document.getElementById('playerId').value.trim(),
+                player_name: document.getElementById('playerName').value.trim(),
+                alliance_name: document.getElementById('allianceName').value.trim(),
+                infantry_level: document.getElementById('infantryLevel').value,
+                lancer_level: document.getElementById('lancerLevel').value,
+                marksman_level: document.getElementById('marksmanLevel').value,
+                updated_at: new Date()
+            };
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = dict.savingBtn || "Saving...";
+
+            const { error } = await supabaseClient
+                .from('svs_player_submissions')
+                .upsert(payload, { onConflict: 'player_id' });
+
+            if (error) {
+                console.error(error);
+                feedbackEl.textContent = dict.errorMsg || "";
+                feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
+            } else {
+                feedbackEl.textContent = dict.successMsg || "";
+                feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = dict.submitBtn || "";
+        });
+
+        // Initialize default language on page load
+        loadLanguage('en');
+    </script>
+</body>
+</html>
