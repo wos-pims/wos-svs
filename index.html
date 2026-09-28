@@ -733,7 +733,8 @@
         });
 
         // Initialize language and check for remembered ID on startup
-        loadLanguage('en'); // Defaults to English or can load saved preference
+        currentLang = 'en';
+        applyTranslations();
 
         const savedPlayerId = localStorage.getItem('wos_player_id');
         if (savedPlayerId) {
