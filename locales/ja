@@ -1,0 +1,23 @@
+{
+  "title": "WoS SvS チーム登録 - ピムス 🍟",
+  "instructions": "以下にプレイヤーIDを入力してください。システムがプロフィールを検索し、前回の回答を自動的に読み込みます。",
+  "playerIdLabel": "プレイヤーID",
+  "playerIdPlaceholder": "例: 12345678",
+  "lookupBtn": "ID確認",
+  "playerNameLabel": "プレイヤー名（ゲーム内）",
+  "playerNamePlaceholder": "例: ChipsLover",
+  "allianceLabel": "同盟タグ",
+  "alliancePlaceholder": "例: [ABC] 同盟",
+  "infantryLabel": "1. 歩兵レベル",
+  "lancerLabel": "2. 騎兵レベル",
+  "marksmanLabel": "3. 弓兵レベル",
+  "selectPrompt": "-- レベルを選択 --",
+  "submitBtn": "登録を保存 / 更新",
+  "savingBtn": "保存中...",
+  "checkingText": "確認中...",
+  "foundMsg": "✨ 前回のプロフィールとデータを読み込みました！",
+  "newMsg": "🔍 新しいプレイヤーIDです。名前と詳細を入力してください。",
+  "successMsg": "✅ Supabase データベースに正常に保存されました！",
+  "errorMsg": "❌ 保存エラーが発生しました。設定を確認してください。",
+  "footer": "チップス提供 🍟"
+}
