@@ -235,7 +235,7 @@
     <!-- Application Script -->
     <script>
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -293,8 +293,8 @@
             statusEl.textContent = dict.checkingText || "Checking...";
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
             
+            // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
             try {
-                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
@@ -306,11 +306,17 @@
                     document.getElementById('playerName').value = rec.player_name || '';
                     document.getElementById('allianceName').value = rec.alliance_name || '';
 
-                    statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? dict.foundMsg : dict.newMsg;
+                    statusEl.textContent = dict.foundMsg || "Found!";
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 }
+            } catch (err) {
+                console.warn("Edge function lookup skipped/failed:", err);
+                statusEl.textContent = dict.newMsg || "Manual entry required for profile.";
+                statusEl.className = "text-xs mt-1.5 text-cyan-400 h-4";
+            }
 
-                // 2. Pull previously entered form data (Troop Levels) from svs_player_submissions
+            // 2. Pull previously entered form data (Troop Levels) independently
+            try {
                 const { data: subData } = await supabaseClient
                     .from('svs_player_submissions')
                     .select('*')
@@ -326,8 +332,12 @@
                     document.getElementById('lancerLevel').value = "";
                     document.getElementById('marksmanLevel').value = "";
                 }
+            } catch (subErr) {
+                console.error("Error loading player submissions:", subErr);
+            }
 
-                // 3. Pull previously saved hero checklist from svs_heroes
+            // 3. Pull previously saved hero checklist independently
+            try {
                 const { data: heroData } = await supabaseClient
                     .from('svs_heroes')
                     .select('*')
@@ -345,11 +355,8 @@
                         if (checkbox) checkbox.checked = false;
                     });
                 }
-
-            } catch (err) {
-                console.error(err);
-                statusEl.textContent = dict.newMsg || "";
-                statusEl.className = "text-xs mt-1.5 text-cyan-400 h-4";
+            } catch (heroErr) {
+                console.error("Error loading hero checklist:", heroErr);
             }
         }
 
