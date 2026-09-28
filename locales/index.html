@@ -88,26 +88,18 @@
     <!-- Script Logic -->
     <script>
         // --- SUPABASE CONFIGURATION ---
-        // Using 'var' prevents Temporal Dead Zone and hoisting initialization errors
-        var SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        var SUPABASE_URL =  'https://obszqwrlcsyryrnlzbkb.supabase.co';
         var SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
-        
         var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         var currentNextSvsDate = '';
         var allCandidates = [];
-
-        // Comprehensive list of tracked hero keys
-        const heroKeys = [
-            'jessie', 'sergey', 'gina', 'bahiti', 'cloris', 'patrick', 
-            'seoyoon', 'alonso', 'molly', 'zinman', 'lynn', 'ahmose', 
-            'norah', 'wayne', 'gwen', 'sonya', 'hendrick', 'renee', 'greg'
-        ];
+        var heroKeys = []; // Dynamically populated from database records
 
         // Initialize page data on load
         window.addEventListener('DOMContentLoaded', async () => {
             await fetchSystemSettings();
-            renderHeroCheckboxes();
+            await fetchAndExtractHeroes();
         });
 
         async function fetchSystemSettings() {
@@ -125,10 +117,44 @@
             }
         }
 
+        // Automatically discover hero keys from database structure
+        async function fetchAndExtractHeroes() {
+            try {
+                const { data: heroRes, error } = await supabaseClient
+                    .from('svs_heroes')
+                    .select('*')
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (heroRes && heroRes.length > 0) {
+                    const sampleRow = heroRes[0];
+                    const heroSet = new Set();
+                    
+                    // Look through column names ending with _stars or _skill to identify heroes
+                    Object.keys(sampleRow).forEach(col => {
+                        if (col.endsWith('_stars') || col.endsWith('_skill')) {
+                            const heroName = col.replace(/(_stars|_skill)$/, '');
+                            heroSet.add(heroName);
+                        }
+                    });
+
+                    heroKeys = Array.from(heroSet).sort();
+                }
+            } catch (err) {
+                console.error("Error extracting heroes dynamically:", err);
+            }
+        }
+
         // Render checkboxes for the 4 hero selection step
         function renderHeroCheckboxes() {
             const grid = document.getElementById('heroCheckboxGrid');
             grid.innerHTML = '';
+
+            if (heroKeys.length === 0) {
+                grid.innerHTML = `<p class="text-xs text-amber-400 col-span-full">No heroes found in the database. Ensure player hero data has been submitted.</p>`;
+                return;
+            }
 
             heroKeys.forEach(key => {
                 grid.innerHTML += `
@@ -186,6 +212,19 @@
                 const submissions = subRes.data || [];
                 const heroesData = heroRes.data || [];
                 const availData = availRes.data || [];
+
+                // If heroKeys wasn't populated yet, extract them now
+                if (heroKeys.length === 0 && heroesData.length > 0) {
+                    const heroSet = new Set();
+                    Object.keys(heroesData[0]).forEach(col => {
+                        if (col.endsWith('_stars') || col.endsWith('_skill')) {
+                            heroSet.add(col.replace(/(_stars|_skill)$/, ''));
+                        }
+                    });
+                    heroKeys = Array.from(heroSet).sort();
+                }
+
+                renderHeroCheckboxes();
 
                 // Map and combine datasets
                 allCandidates = submissions.map(sub => {
