@@ -88,13 +88,14 @@
     <!-- Script Logic -->
     <script>
         // --- SUPABASE CONFIGURATION ---
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Using 'var' prevents Temporal Dead Zone and hoisting initialization errors
+        var SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        var SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        
+        var supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Global variables initialized properly at the top
-        let currentNextSvsDate = '';
-        let allCandidates = [];
+        var currentNextSvsDate = '';
+        var allCandidates = [];
 
         // Comprehensive list of tracked hero keys
         const heroKeys = [
@@ -155,8 +156,6 @@
             const num = parseInt(cleanStr.replace(/[^0-9]/g, '')) || 0;
             const isHelios = cleanStr.includes('HELIOS') || cleanStr.includes('T11');
 
-            // Scale: Standard tier = num * 10. Helios tier adds a +5 bonus, 
-            // ensuring FC8 Helios (85) beats FC8 (80), but is beaten by FC9 Standard (90).
             const baseWeight = num * 10;
             return isHelios ? baseWeight + 5 : baseWeight;
         }
