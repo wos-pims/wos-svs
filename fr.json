@@ -1,0 +1,23 @@
+{
+  "title": "Inscription SvS WoS - par Pims 🍟",
+  "instructions": "Entrez votre ID de joueur ci-dessous. Le système récupérera votre profil et vos réponses précédentes.",
+  "playerIdLabel": "ID du joueur",
+  "playerIdPlaceholder": "ex. 12345678",
+  "lookupBtn": "Vérifier",
+  "playerNameLabel": "Nom du joueur (en jeu)",
+  "playerNamePlaceholder": "ex. AimeLesFrites",
+  "allianceLabel": "Tag de l'alliance",
+  "alliancePlaceholder": "ex. [ABC] Alliance",
+  "infantryLabel": "1. Niveau d'infanterie",
+  "lancerLabel": "2. Niveau de lancier",
+  "marksmanLabel": "3. Niveau de tireur d'élite",
+  "selectPrompt": "-- Sélectionner le niveau --",
+  "submitBtn": "Enregistrer / Mettre à jour l'inscription",
+  "savingBtn": "Enregistrement...",
+  "checkingText": "Vérification...",
+  "foundMsg": "✨ Profil et données précédents chargés !",
+  "newMsg": "🔍 Nouvel ID de joueur. Veuillez entrer vos nom et détails.",
+  "successMsg": "✅ Enregistré avec succès dans la base de données Supabase !",
+  "errorMsg": "❌ Erreur lors de l'enregistrement. Veuillez vérifier votre configuration.",
+  "footer": "Fonctionne grâce à des frites 🍟"
+}
