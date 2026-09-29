@@ -731,10 +731,10 @@
                 allianceInput.value = "";
             }
 
-            // 2. Pull previously entered player record (`wos_players` or submissions)
+            // Pull previously entered player submission record (`svs_player_submissions`)
             try {
                 const { data: subData } = await supabaseClient
-                    .from('wos_players')
+                    .from('svs_player_submissions')
                     .select('*')
                     .eq('player_id', playerId)
                     .maybeSingle();
@@ -840,8 +840,22 @@
             const allianceId = 2056000121;
             const allianceName = document.getElementById('allianceName').value.trim() || "MNG";
 
-            // 1. Save player record
-            const payload = {
+            // 1. Save basic player record to wos_players
+            const playerPayload = {
+                player_id: playerId,
+                name: document.getElementById('playerName').value.trim(),
+                alliance_abbr: allianceName,
+                kingdom_id: stateNum,
+                alliance_id: allianceId,
+                updated_at: new Date()
+            };
+
+            const { error: playerError } = await supabaseClient
+                .from('wos_players')
+                .upsert(playerPayload, { onConflict: 'player_id' });
+
+            // 2. Save combat readiness and submission details to svs_player_submissions
+            const submissionPayload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
                 alliance_name: allianceName,
@@ -856,10 +870,10 @@
             };
 
             const { error: subError } = await supabaseClient
-                .from('wos_players')
-                .upsert(payload, { onConflict: 'player_id' });
+                .from('svs_player_submissions')
+                .upsert(submissionPayload, { onConflict: 'player_id' });
 
-            // 2. Save hero selections
+            // 3. Save hero selections
             const heroPayload = {
                 player_id: playerId,
                 updated_at: new Date()
@@ -873,7 +887,7 @@
                 .from('svs_heroes')
                 .upsert(heroPayload, { onConflict: 'player_id' });
 
-            // 3. Save Castle Battle Availability
+            // 4. Save Castle Battle Availability
             const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
             let selectedSlots = [];
             if (selectedType === 'slots') {
@@ -894,8 +908,8 @@
                 .from('svs_availability')
                 .upsert(availPayload, { onConflict: 'player_id,battle_date' });
 
-            if (subError || heroError || availError) {
-                const errObj = subError || heroError || availError;
+            if (playerError || subError || heroError || availError) {
+                const errObj = playerError || subError || heroError || availError;
                 console.error("Save Error Details:", errObj);
                 feedbackEl.textContent = `Error: ${errObj.message || 'Check configuration'}`;
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
