@@ -816,6 +816,7 @@
         document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
 
         // Form Submission handler
+        // Form Submission handler
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -840,21 +841,7 @@
             const allianceId = 2056000121;
             const allianceName = document.getElementById('allianceName').value.trim() || "MNG";
 
-            // 1. Save basic player record to wos_players
-            const playerPayload = {
-                player_id: playerId,
-                name: document.getElementById('playerName').value.trim(),
-                alliance_name: allianceName,
-                kingdom_id: stateNum,
-                alliance_id: allianceId,
-                updated_at: new Date()
-            };
-
-            const { error: playerError } = await supabaseClient
-                .from('wos_players')
-                .upsert(playerPayload, { onConflict: 'player_id' });
-
-            // 2. Save combat readiness and submission details to svs_player_submissions
+            // 1. Save combat readiness and submission details to svs_player_submissions
             const submissionPayload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
@@ -873,7 +860,7 @@
                 .from('svs_player_submissions')
                 .upsert(submissionPayload, { onConflict: 'player_id' });
 
-            // 3. Save hero selections
+            // 2. Save hero selections
             const heroPayload = {
                 player_id: playerId,
                 updated_at: new Date()
@@ -887,7 +874,7 @@
                 .from('svs_heroes')
                 .upsert(heroPayload, { onConflict: 'player_id' });
 
-            // 4. Save Castle Battle Availability
+            // 3. Save Castle Battle Availability
             const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
             let selectedSlots = [];
             if (selectedType === 'slots') {
@@ -908,8 +895,8 @@
                 .from('svs_availability')
                 .upsert(availPayload, { onConflict: 'player_id,battle_date' });
 
-            if (playerError || subError || heroError || availError) {
-                const errObj = playerError || subError || heroError || availError;
+            if (subError || heroError || availError) {
+                const errObj = subError || heroError || availError;
                 console.error("Save Error Details:", errObj);
                 feedbackEl.textContent = `Error: ${errObj.message || 'Check configuration'}`;
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
