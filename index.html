@@ -27,7 +27,7 @@
     <header class="w-full border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
         <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
             <h1 id="headerTitle" class="font-bold text-lg text-cyan-400 tracking-wide">WoS SvS Team Registration - by Pims 🍟</h1>
-            <div class="flex items-center space-x-2">
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
                 <span class="text-xs text-slate-400">🌐</span>
                 <select id="langSwitch" class="bg-slate-800 text-slate-200 text-sm rounded-lg border border-slate-700 px-2.5 py-1.5 focus:outline-none focus:border-cyan-500">
                     <option value="en">🇺🇸 English</option>
@@ -36,6 +36,7 @@
                     <option value="it">🇮🇹 Italiano</option>
                     <option value="pl">🇵🇱 Polski</option>
                     <option value="tr">🇹🇷 Türkçe</option>
+                    <option value="ar">🇸🇦 العربية</option>
                     <option value="ja">🇯🇵 日本語</option>
                     <option value="zh">🇨🇳 中文</option>
                 </select>
@@ -68,20 +69,36 @@
                     <div id="lookupStatus" class="text-xs mt-1.5 text-slate-400 h-4"></div>
                 </div>
 
-                <!-- Player Name (Auto-fetched) -->
-                <div>
-                    <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
-                    <input type="text" id="playerName" readonly 
-                        class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
-                        placeholder="Auto-filled via Check ID">
+                <!-- Player Name & Alliance Tag (Auto-fetched) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
+                        <input type="text" id="playerName" readonly 
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                            placeholder="Auto-filled via Check ID">
+                    </div>
+                    <div>
+                        <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
+                        <input type="text" id="allianceName" readonly 
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                            placeholder="Auto-filled via Check ID">
+                    </div>
                 </div>
 
-                <!-- Alliance Name (Auto-fetched Tag) -->
-                <div>
-                    <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
-                    <input type="text" id="allianceName" readonly 
-                        class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
-                        placeholder="Auto-filled via Check ID">
+                <!-- Usual Name & Labyrinth Score -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label id="lblUsualName" class="block text-sm font-medium text-slate-300 mb-1.5">Usual Name (Optional - SvS Alias)</label>
+                        <input type="text" id="usualName" 
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. MainFarmer">
+                    </div>
+                    <div>
+                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score (Max 3000)</label>
+                        <input type="number" id="labyrinthScore" min="0" max="3000" 
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. 2850">
+                    </div>
                 </div>
 
                 <!-- Troop Levels Grid -->
@@ -164,7 +181,7 @@
                 <div class="border-t border-slate-800 pt-5">
                     <div class="flex justify-between items-center mb-3">
                         <label id="lblHeroesTitle" class="block text-sm font-medium text-slate-300">Heroes Status:</label>
-                        <div class="flex space-x-4 text-xs text-slate-400 font-medium">
+                        <div class="flex space-x-4 rtl:space-x-reverse text-xs text-slate-400 font-medium">
                             <span class="w-12 text-center">5★</span>
                             <span class="w-16 text-center">Skill 5</span>
                         </div>
@@ -181,19 +198,19 @@
 
                     <!-- Participation Type Radio Options -->
                     <div class="space-y-2.5 mb-4 text-sm text-slate-300">
-                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
                             <input type="radio" name="participationType" value="slots" id="typeSlots" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
                             <span id="lblTypeSlots">Available during specific time slots (select below)</span>
                         </label>
-                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
                             <input type="radio" name="participationType" value="unscheduled" id="typeUnscheduled" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
                             <span id="lblTypeUnscheduled">Participate (can't tell exact time / flexible)</span>
                         </label>
-                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
                             <input type="radio" name="participationType" value="on_and_off" id="typeOnOff" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
                             <span id="lblTypeOnOff">On and off</span>
                         </label>
-                        <label class="flex items-center space-x-2.5 cursor-pointer">
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
                             <input type="radio" name="participationType" value="none" id="typeNone" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
                             <span id="lblTypeNone">Won't participate at all</span>
                         </label>
@@ -203,23 +220,23 @@
                     <div id="timeSlotsContainer" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 space-y-2 hidden">
                         <span id="lblSelectSlots" class="block text-xs font-medium text-slate-400 mb-2">Select available 1-hour UTC slots:</span>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
-                            <label class="flex items-center space-x-2 cursor-pointer">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
                                 <input type="checkbox" value="12:00-13:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
                                 <span>12:00 - 13:00 UTC</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
                                 <input type="checkbox" value="13:00-14:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
                                 <span>13:00 - 14:00 UTC</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
                                 <input type="checkbox" value="14:00-15:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
                                 <span>14:00 - 15:00 UTC</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
                                 <input type="checkbox" value="15:00-16:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
                                 <span>15:00 - 16:00 UTC</span>
                             </label>
-                            <label class="flex items-center space-x-2 cursor-pointer">
+                            <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
                                 <input type="checkbox" value="16:00-17:00" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
                                 <span>16:00 - 17:00 UTC</span>
                             </label>
@@ -266,6 +283,7 @@
             it: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             pl: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             tr: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
+            ar: { bradley: 'برادلي', edith: 'إيديث', gatot: 'غاتوت', hector: 'هكتور', hendricks: 'هيندريكس', jasser: 'جاسر', jessie: 'جيسي', magnus: 'ماغنوس', mia: 'ميا', norah: 'نورا', patrick: 'باتريك', reina: 'رينا', renee: 'رينيه', seo_yoon: 'سيو-يون' },
             zh: { bradley: '布拉德利', edith: '伊迪丝', gatot: '加托', hector: '赫克托', hendricks: '亨德里克斯', jasser: '贾瑟', jessie: '杰西', magnus: '马格努斯', mia: '米娅', norah: '诺拉', patrick: '帕特里克', reina: '雷娜', renee: '蕾妮', seo_yoon: '徐允' },
             ja: { bradley: 'ブラッドリー', edith: 'イーディス', gatot: 'ガトット', hector: 'ヘクター', hendricks: 'ヘンドリックス', jasser: 'ジャッサー', jessie: 'ジェシー', magnus: 'マグナス', mia: 'ミア', norah: 'ノラ', patrick: 'パトリック', reina: 'レイナ', renee: 'レネ', seo_yoon: 'ソ・ユン' }
         };
@@ -282,6 +300,10 @@
                 playerNamePlaceholder: "Auto-filled via Check ID",
                 allianceLabel: "Alliance Tag",
                 alliancePlaceholder: "Auto-filled via Check ID",
+                usualNameLabel: "Usual Name (Optional - SvS Alias)",
+                usualNamePlaceholder: "e.g. MainFarmer",
+                labyrinthScoreLabel: "Labyrinth Score (Max 3000)",
+                labyrinthScorePlaceholder: "e.g. 2850",
                 infantryLabel: "Infantry Level",
                 lancerLabel: "Lancer Level",
                 marksmanLabel: "Marksman Level",
@@ -310,6 +332,10 @@
                 playerNamePlaceholder: "Rempli automatiquement",
                 allianceLabel: "Tag d'alliance",
                 alliancePlaceholder: "Rempli automatiquement",
+                usualNameLabel: "Nom usuel / Pseudo SvS (Optionnel)",
+                usualNamePlaceholder: "ex: MainFarmer",
+                labyrinthScoreLabel: "Score du Labyrinthe (Max 3000)",
+                labyrinthScorePlaceholder: "ex: 2850",
                 infantryLabel: "Niveau Infanterie",
                 lancerLabel: "Niveau Lancier",
                 marksmanLabel: "Niveau Tireur",
@@ -338,6 +364,10 @@
                 playerNamePlaceholder: "Autorelleno",
                 allianceLabel: "Etiqueta de Alianza",
                 alliancePlaceholder: "Autorelleno",
+                usualNameLabel: "Nombre habitual / Alias SvS (Opcional)",
+                usualNamePlaceholder: "ej. MainFarmer",
+                labyrinthScoreLabel: "Puntuación de Laberinto (Máx 3000)",
+                labyrinthScorePlaceholder: "ej. 2850",
                 infantryLabel: "Nivel de Infantería",
                 lancerLabel: "Nivel de Lancer",
                 marksmanLabel: "Nivel de Tirador",
@@ -366,6 +396,10 @@
                 playerNamePlaceholder: "Autoriempito",
                 allianceLabel: "Tag Alleanza",
                 alliancePlaceholder: "Autoriempito",
+                usualNameLabel: "Nome abituale / Alias SvS (Opzionale)",
+                usualNamePlaceholder: "es. MainFarmer",
+                labyrinthScoreLabel: "Punteggio Labirinto (Max 3000)",
+                labyrinthScorePlaceholder: "es. 2850",
                 infantryLabel: "Livello Fanteria",
                 lancerLabel: "Livello Lanciere",
                 marksmanLabel: "Livello Tiratore",
@@ -394,6 +428,10 @@
                 playerNamePlaceholder: "自動入力",
                 allianceLabel: "同盟タグ",
                 alliancePlaceholder: "自動入力",
+                usualNameLabel: "普段の名前 / SvS用別名（任意）",
+                usualNamePlaceholder: "例: MainFarmer",
+                labyrinthScoreLabel: "ラビリンススコア（最大3000）",
+                labyrinthScorePlaceholder: "例: 2850",
                 infantryLabel: "歩兵レベル",
                 lancerLabel: "槍兵レベル",
                 marksmanLabel: "弓兵レベル",
@@ -422,6 +460,10 @@
                 playerNamePlaceholder: "Uzupełniane automatycznie",
                 allianceLabel: "Tag Sojuszu",
                 alliancePlaceholder: "Uzupełniane automatycznie",
+                usualNameLabel: "Zwykła nazwa / Alias SvS (Opcjonalnie)",
+                usualNamePlaceholder: "np. MainFarmer",
+                labyrinthScoreLabel: "Wynik Labiryntu (Maks 3000)",
+                labyrinthScorePlaceholder: "np. 2850",
                 infantryLabel: "Poziom Piechoty",
                 lancerLabel: "Poziom Lancerów",
                 marksmanLabel: "Poziom Strzelców",
@@ -450,6 +492,10 @@
                 playerNamePlaceholder: "Otomatik doldurulur",
                 allianceLabel: "İttifak Etiketi",
                 alliancePlaceholder: "Otomatik doldurulur",
+                usualNameLabel: "Genel Kullanılan Ad / SvS Takma Adı (İsteğe bağlı)",
+                usualNamePlaceholder: "örn. MainFarmer",
+                labyrinthScoreLabel: "Labirent Skoru (Maks 3000)",
+                labyrinthScorePlaceholder: "örn. 2850",
                 infantryLabel: "Piyade Seviyesi",
                 lancerLabel: "Mızraklı Seviyesi",
                 marksmanLabel: "Nişancı Seviyesi",
@@ -468,6 +514,38 @@
                 foundMsg: "Veritabanında bulundu!",
                 newMsg: "Yeni ID veya önbellekte yok."
             },
+            ar: {
+                title: "تسجيل فريق حرب الولايات WoS - بواسطة Pims 🍟",
+                instructions: "أدخل معرف الشيف الخاص بك لتحميل معلومات ملفك الشخصي تلقائياً، ثم املأ جاهزيتك القتالية، وحالة الأبطال، ومدى توفرك لمعركة القلعة.",
+                playerIdLabel: "معرف شيف اللاعب (Chief ID)",
+                playerIdPlaceholder: "مثال: 295897829",
+                lookupBtn: "التحقق من المعرف",
+                playerNameLabel: "اسم اللاعب",
+                playerNamePlaceholder: "يتم التعبئة تلقائياً عبر التحقق",
+                allianceLabel: "علامة التحالف",
+                alliancePlaceholder: "يتم التعبئة تلقائياً عبر التحقق",
+                usualNameLabel: "الاسم المعتاد / اللقب في SvS (اختياري)",
+                usualNamePlaceholder: "مثال: MainFarmer",
+                labyrinthScoreLabel: "نقاط المتاهة (الحد الأقصى 3000)",
+                labyrinthScorePlaceholder: "مثال: 2850",
+                infantryLabel: "مستوى المشاة",
+                lancerLabel: "مستوى الرماح",
+                marksmanLabel: "مستوى الرماة",
+                selectPrompt: "-- اختر المستوى --",
+                heroesTitle: "حالة الأبطال (5 نجوم والمهارة 5):",
+                availTitle: "التوفر لمعركة القلعة",
+                typeSlots: "متاح خلال فترات زمنية محددة (اختر أدناه)",
+                typeUnscheduled: "مشارك (الوقت غير محدد بدقة / مرن)",
+                typeOnOff: "متصل وغير متصل (بشكل متقطع)",
+                typeNone: "لن أشارك على الإطلاق",
+                selectSlots: "حدد فترات التوقيت العالمي المنسق (UTC) المتاحة:",
+                submitBtn: "إرسال التسجيل",
+                savingBtn: "جاري الحفظ...",
+                footer: "مدعوم بالبطاطس المقلية 🍟",
+                checkingText: "جاري التحقق...",
+                foundMsg: "تم العثور عليه في قاعدة البيانات!",
+                newMsg: "معرف جديد أو غير موجود في الذاكرة المؤقتة."
+            },
             zh: {
                 title: "WoS SvS 团队注册 - 作者 Pims 🍟",
                 instructions: "请输入您的首领 ID 以自动加载档案信息，然后填写您的兵种等级、英雄状态以及城堡战可用时间。",
@@ -478,6 +556,10 @@
                 playerNamePlaceholder: "通过 ID 自动填充",
                 allianceLabel: "联盟简称",
                 alliancePlaceholder: "通过 ID 自动填充",
+                usualNameLabel: "常用昵称 / SvS别名（选填）",
+                usualNamePlaceholder: "例如 MainFarmer",
+                labyrinthScoreLabel: "迷宫积分（最高 3000）",
+                labyrinthScorePlaceholder: "例如 2850",
                 infantryLabel: "步兵等级",
                 lancerLabel: "枪兵等级",
                 marksmanLabel: "弓兵等级",
@@ -510,7 +592,7 @@
                 row.className = "flex justify-between items-center bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-800/80 text-xs text-slate-300";
                 row.innerHTML = `
                     <span class="font-medium">${displayName}</span>
-                    <div class="flex space-x-6 pr-2">
+                    <div class="flex space-x-6 rtl:space-x-reverse pr-2 rtl:pr-0 rtl:pl-2">
                         <input type="checkbox" id="hero_${key}_stars" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
                         <input type="checkbox" id="hero_${key}_skill" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
                     </div>
@@ -536,6 +618,12 @@
             document.getElementById('lblAlliance').textContent = t.allianceLabel;
             document.getElementById('allianceName').placeholder = t.alliancePlaceholder;
 
+            document.getElementById('lblUsualName').textContent = t.usualNameLabel;
+            document.getElementById('usualName').placeholder = t.usualNamePlaceholder;
+
+            document.getElementById('lblLabyrinthScore').textContent = t.labyrinthScoreLabel;
+            document.getElementById('labyrinthScore').placeholder = t.labyrinthScorePlaceholder;
+
             document.getElementById('lblInfantry').textContent = t.infantryLabel;
             document.getElementById('lblLancer').textContent = t.lancerLabel;
             document.getElementById('lblMarksman').textContent = t.marksmanLabel;
@@ -555,14 +643,17 @@
             document.getElementById('submitBtn').textContent = t.submitBtn;
             document.getElementById('footerText').textContent = t.footer;
 
-            // Re-render heroes to update names if language changed
             renderHeroes();
         }
 
         document.getElementById('langSwitch').addEventListener('change', (e) => {
             currentLang = e.target.value;
+            if (currentLang === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+            }
             applyTranslations();
-            // Re-fetch data to keep current values if ID exists
             const existingId = document.getElementById('playerId').value.trim();
             if (existingId) fetchPlayerData();
         });
@@ -580,6 +671,23 @@
             });
         });
 
+        // Helper to upsert state and alliance records if fetched from Atlas API
+        async function syncStateAndAllianceRelations(stateNum, allianceId, allianceName) {
+            try {
+                // Upsert State
+                await supabaseClient
+                    .from('states')
+                    .upsert({ number: stateNum }, { onConflict: 'number' });
+
+                // Upsert Alliance
+                await supabaseClient
+                    .from('alliances')
+                    .upsert({ id: allianceId, name: allianceName, state_number: stateNum }, { onConflict: 'id' });
+            } catch (err) {
+                console.error("Error syncing state/alliance relations:", err);
+            }
+        }
+
         // Fetch settings and player data
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
@@ -594,6 +702,10 @@
             statusEl.textContent = t.checkingText;
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
             
+            let fetchedStateNum = 2056; // Default fallback state
+            let fetchedAllianceId = 2056000121; // Default fallback alliance ID
+            let fetchedAllianceName = "MNG";
+
             try {
                 // 0. Fetch active next_svs_date from settings table
                 const { data: settingData } = await supabaseClient
@@ -605,20 +717,25 @@
                 currentNextSvsDate = settingData ? settingData.value : 'Unknown Date';
                 document.getElementById('battleDateDisplay').textContent = `Next Battle Date: ${currentNextSvsDate}`;
 
-                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function
+                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function / Atlas API
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
 
                 if (error) throw error;
 
-                // Check if we got a valid response AND an actual player name back
                 if (response && response.data && response.data.player_name) {
                     const rec = response.data;
                     nameInput.value = rec.player_name;
-                    allianceInput.value = rec.alliance_name || '';
+                    allianceInput.value = rec.alliance_name || 'MNG';
 
-                    // Lock them since API succeeded with valid data
+                    if (rec.state_number) fetchedStateNum = rec.state_number;
+                    if (rec.alliance_id) fetchedAllianceId = rec.alliance_id;
+                    if (rec.alliance_name) fetchedAllianceName = rec.alliance_name;
+
+                    // Automatically sync state & alliance tables if fetched from API
+                    await syncStateAndAllianceRelations(fetchedStateNum, fetchedAllianceId, fetchedAllianceName);
+
                     nameInput.setAttribute('readonly', true);
                     nameInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
                     
@@ -628,7 +745,6 @@
                     statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? t.foundMsg : t.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 } else {
-                    // Trigger manual fallback if data is empty or player name is missing
                     throw new Error("Player not found in API");
                 }
             } catch (err) {
@@ -636,22 +752,21 @@
                 statusEl.textContent = "Player not found. Please enter name & tag manually.";
                 statusEl.className = "text-xs mt-1.5 text-amber-400 h-4";
 
-                // UNLOCK fields so you can type manually
                 nameInput.removeAttribute('readonly');
                 nameInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 nameInput.placeholder = "Enter your player name";
-                nameInput.value = ""; // Clear out any stale empty values
+                nameInput.value = "";
 
                 allianceInput.removeAttribute('readonly');
                 allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 allianceInput.placeholder = "Enter alliance tag";
-                allianceInput.value = ""; // Clear out any stale empty values
+                allianceInput.value = "";
             }
 
-            // 2. Pull previously entered troop levels
+            // 2. Pull previously entered player record (`wos_players` or submissions)
             try {
                 const { data: subData } = await supabaseClient
-                    .from('svs_player_submissions')
+                    .from('wos_players')
                     .select('*')
                     .eq('player_id', playerId)
                     .maybeSingle();
@@ -660,10 +775,14 @@
                     document.getElementById('infantryLevel').value = subData.infantry_level || "";
                     document.getElementById('lancerLevel').value = subData.lancer_level || "";
                     document.getElementById('marksmanLevel').value = subData.marksman_level || "";
+                    document.getElementById('usualName').value = subData.usual_name || "";
+                    document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
                 } else {
                     document.getElementById('infantryLevel').value = "";
                     document.getElementById('lancerLevel').value = "";
                     document.getElementById('marksmanLevel').value = "";
+                    document.getElementById('usualName').value = "";
+                    document.getElementById('labyrinthScore').value = "";
                 }
             } catch (subErr) {
                 console.error("Error loading submissions:", subErr);
@@ -728,25 +847,42 @@
         document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
         document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
 
-        // Form Submission handler (Upserts to all 3 tables)
+        // Form Submission handler
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             const feedbackEl = document.getElementById('formFeedback');
             const playerId = Number(document.getElementById('playerId').value.trim());
+            const labyrinthVal = parseInt(document.getElementById('labyrinthScore').value) || 0;
             const t = translations[currentLang] || translations['en'];
 
             if (!playerId) return;
+
+            if (labyrinthVal > 3000) {
+                alert("Labyrinth score cannot exceed 3000.");
+                return;
+            }
+
             localStorage.setItem('wos_player_id', playerId);
 
             submitBtn.disabled = true;
             submitBtn.textContent = t.savingBtn;
 
-            // 1. Save submission data
+            const stateNum = 2056;
+            const allianceId = 2056000121;
+            const allianceName = document.getElementById('allianceName').value.trim() || "MNG";
+
+            await syncStateAndAllianceRelations(stateNum, allianceId, allianceName);
+
+            // 1. Save player record
             const payload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
-                alliance_name: document.getElementById('allianceName').value.trim(),
+                alliance_name: allianceName,
+                usual_name: document.getElementById('usualName').value.trim() || null,
+                labyrinth_score: labyrinthVal,
+                state_number: stateNum,
+                alliance_id: allianceId,
                 infantry_level: document.getElementById('infantryLevel').value,
                 lancer_level: document.getElementById('lancerLevel').value,
                 marksman_level: document.getElementById('marksmanLevel').value,
@@ -754,10 +890,10 @@
             };
 
             const { error: subError } = await supabaseClient
-                .from('svs_player_submissions')
+                .from('wos_players')
                 .upsert(payload, { onConflict: 'player_id' });
 
-            // 2. Save hero selections (stars & skill 5)
+            // 2. Save hero selections
             const heroPayload = {
                 player_id: playerId,
                 updated_at: new Date()
@@ -771,7 +907,7 @@
                 .from('svs_heroes')
                 .upsert(heroPayload, { onConflict: 'player_id' });
 
-            // 3. Save Castle Battle Availability tied to currentNextSvsDate
+            // 3. Save Castle Battle Availability
             const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
             let selectedSlots = [];
             if (selectedType === 'slots') {
