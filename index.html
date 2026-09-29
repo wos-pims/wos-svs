@@ -895,8 +895,9 @@
                 .upsert(availPayload, { onConflict: 'player_id,battle_date' });
 
             if (subError || heroError || availError) {
-                console.error(subError || heroError || availError);
-                feedbackEl.textContent = "Error saving data. Please check configuration.";
+                const errObj = subError || heroError || availError;
+                console.error("Save Error Details:", errObj);
+                feedbackEl.textContent = `Error: ${errObj.message || 'Check configuration'}`;
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
             } else {
                 feedbackEl.textContent = "Saved successfully!";
