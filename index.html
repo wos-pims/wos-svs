@@ -663,10 +663,10 @@
         async function syncStateAndAllianceRelations(stateNum, allianceId, allianceName) {
             try {
                 // Upsert State
-                const { data, error } = await supabaseClient
+                await supabaseClient
                     .from('states')
-                    .upsert(stateData, { on_conflict: 'record_number' });
-
+                    .upsert({ id: stateNum, name: stateNum }, { onConflict: 'id' });
+        
                 // Upsert Alliance
                 await supabaseClient
                     .from('alliances')
