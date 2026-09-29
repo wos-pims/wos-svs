@@ -756,7 +756,7 @@
                 const { data: subData } = await supabaseClient
                     .from('wos_players')
                     .select('*')
-                    .eq('wos_id', playerId)
+                    .eq('player_id', playerId)
                     .maybeSingle();
 
                 if (subData) {
