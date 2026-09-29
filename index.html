@@ -698,7 +698,7 @@
                 if (response && response.data && response.data.player_name) {
                     const rec = response.data;
                     nameInput.value = rec.player_name;
-                    allianceInput.value = rec.alliance_name || 'MNG';
+                    allianceInput.value = rec.alliance_name;
 
                     if (rec.state_number) fetchedStateNum = rec.state_number;
                     if (rec.alliance_id) fetchedAllianceId = rec.alliance_id;
@@ -845,7 +845,6 @@
             const submissionPayload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
-                alliance_name: allianceName,
                 usual_name: document.getElementById('usualName').value.trim() || null,
                 labyrinth_score: labyrinthVal,
                 state_number: stateNum,
