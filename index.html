@@ -704,9 +704,6 @@
                     if (rec.alliance_id) fetchedAllianceId = rec.alliance_id;
                     if (rec.alliance_name) fetchedAllianceName = rec.alliance_name;
 
-                    // Automatically sync state & alliance tables if fetched from API
-                    await syncStateAndAllianceRelations(fetchedStateNum, fetchedAllianceId, fetchedAllianceName);
-
                     nameInput.setAttribute('readonly', true);
                     nameInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
                     
@@ -842,8 +839,6 @@
             const stateNum = 2056;
             const allianceId = 2056000121;
             const allianceName = document.getElementById('allianceName').value.trim() || "MNG";
-
-            await syncStateAndAllianceRelations(stateNum, allianceId, allianceName);
 
             // 1. Save player record
             const payload = {
