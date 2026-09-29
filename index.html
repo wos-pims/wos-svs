@@ -88,16 +88,16 @@
                 <!-- Usual Name & Labyrinth Score -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label id="lblUsualName" class="block text-sm font-medium text-slate-300 mb-1.5">Usual Name (Optional - SvS Alias)</label>
+                        <label id="lblUsualName" class="block text-sm font-medium text-slate-300 mb-1.5">Usual Name (Optional - in case your current name is a temporary name)</label>
                         <input type="text" id="usualName" 
                             class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
                             placeholder="e.g. MainFarmer">
                     </div>
                     <div>
-                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score (Max 3000)</label>
+                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score</label>
                         <input type="number" id="labyrinthScore" min="0" max="3000" 
                             class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
-                            placeholder="e.g. 2850">
+                            placeholder="e.g. 1852">
                     </div>
                 </div>
 
@@ -107,10 +107,6 @@
                         <label id="lblInfantry" class="block text-xs font-medium text-slate-300 mb-1">Infantry Level</label>
                         <select id="infantryLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
                             <option value="" disabled selected id="optInfantryPrompt">-- Select Level --</option>
-                            <option value="FC12 helios">FC12 helios</option>
-                            <option value="FC12">FC12</option>
-                            <option value="FC11 helios">FC11 helios</option>
-                            <option value="FC11">FC11</option>
                             <option value="FC10 helios">FC10 helios</option>
                             <option value="FC10">FC10</option>
                             <option value="FC9 helios">FC9 helios</option>
@@ -131,10 +127,6 @@
                         <label id="lblLancer" class="block text-xs font-medium text-slate-300 mb-1">Lancer Level</label>
                         <select id="lancerLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
                             <option value="" disabled selected id="optLancerPrompt">-- Select Level --</option>
-                            <option value="FC12 helios">FC12 helios</option>
-                            <option value="FC12">FC12</option>
-                            <option value="FC11 helios">FC11 helios</option>
-                            <option value="FC11">FC11</option>
                             <option value="FC10 helios">FC10 helios</option>
                             <option value="FC10">FC10</option>
                             <option value="FC9 helios">FC9 helios</option>
@@ -155,10 +147,6 @@
                         <label id="lblMarksman" class="block text-xs font-medium text-slate-300 mb-1">Marksman Level</label>
                         <select id="marksmanLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500">
                             <option value="" disabled selected id="optMarksmanPrompt">-- Select Level --</option>
-                            <option value="FC12 helios">FC12 helios</option>
-                            <option value="FC12">FC12</option>
-                            <option value="FC11 helios">FC11 helios</option>
-                            <option value="FC11">FC11</option>
                             <option value="FC10 helios">FC10 helios</option>
                             <option value="FC10">FC10</option>
                             <option value="FC9 helios">FC9 helios</option>
@@ -182,8 +170,8 @@
                     <div class="flex justify-between items-center mb-3">
                         <label id="lblHeroesTitle" class="block text-sm font-medium text-slate-300">Heroes Status:</label>
                         <div class="flex space-x-4 rtl:space-x-reverse text-xs text-slate-400 font-medium">
-                            <span class="w-12 text-center">5★</span>
-                            <span class="w-16 text-center">Skill 5</span>
+                            <span class="w-12 text-center">Hero 5★</span>
+                            <span class="w-16 text-center">Skill level 5</span>
                         </div>
                     </div>
                     <div class="space-y-2" id="heroRows"></div>
@@ -260,7 +248,7 @@
 
     <!-- Footer -->
     <footer class="w-full border-t border-slate-800 py-4 text-center text-xs text-slate-500">
-        <p id="footerText">Whiteout Survival SvS Coordination Tool</p>
+        <p id="footerText">Powered by chips 🍟</p>
     </footer>
 
     <!-- Application Script with Embedded Multi-Language Support -->
@@ -675,9 +663,9 @@
         async function syncStateAndAllianceRelations(stateNum, allianceId, allianceName) {
             try {
                 // Upsert State
-                await supabaseClient
+                const { data, error } = await supabaseClient
                     .from('states')
-                    .upsert({ number: stateNum }, { onConflict: 'number' });
+                    .upsert(stateData, { on_conflict: 'record_number' });
 
                 // Upsert Alliance
                 await supabaseClient
