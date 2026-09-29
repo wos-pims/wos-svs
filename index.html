@@ -659,23 +659,6 @@
             });
         });
 
-        // Helper to upsert state and alliance records if fetched from Atlas API
-        async function syncStateAndAllianceRelations(stateNum, allianceId, allianceName) {
-            try {
-                // Upsert State
-                await supabaseClient
-                    .from('states')
-                    .upsert({ id: stateNum, name: stateNum }, { onConflict: 'id' });
-        
-                // Upsert Alliance
-                await supabaseClient
-                    .from('alliances')
-                    .upsert({ id: allianceId, name: allianceName, state_number: stateNum }, { onConflict: 'id' });
-            } catch (err) {
-                console.error("Error syncing state/alliance relations:", err);
-            }
-        }
-
         // Fetch settings and player data
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
