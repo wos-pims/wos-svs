@@ -147,7 +147,7 @@
                 }
 
                 statesData.forEach(st => {
-                    const stateId = st.id || st.record_number;
+                    const stateId = st.id;
                     const stateName = st.name ? `${stateId} - ${st.name}` : `State ${stateId}`;
                     const opt = document.createElement('option');
                     opt.value = stateId;
@@ -250,19 +250,29 @@
             }
 
             try {
-                const [subRes, heroRes, availRes] = await Promise.all([
-                    supabaseClient.from('svs_player_submissions').select('*').eq('state', selectedStateId),
+                // Fetch submissions filtered by state_id, along with heroes, availability, and alliances lookup
+                const [subRes, heroRes, availRes, allianceRes] = await Promise.all([
+                    supabaseClient.from('svs_player_submissions').select('*').eq('state_id', selectedStateId),
                     supabaseClient.from('svs_heroes').select('*'),
-                    supabaseClient.from('svs_availability').select('*').eq('battle_date', currentNextSvsDate)
+                    supabaseClient.from('svs_availability').select('*').eq('battle_date', currentNextSvsDate),
+                    supabaseClient.from('alliances').select('*')
                 ]);
 
                 if (subRes.error) throw new Error("Submissions error: " + subRes.error.message);
                 if (heroRes.error) throw new Error("Heroes error: " + heroRes.error.message);
                 if (availRes.error) throw new Error("Availability error: " + availRes.error.message);
+                if (allianceRes.error) throw new Error("Alliances error: " + allianceRes.error.message);
 
                 const submissions = subRes.data || [];
                 const heroesData = heroRes.data || [];
                 const availData = availRes.data || [];
+                const alliancesData = allianceRes.data || [];
+
+                // Map alliance ID to alliance name
+                const allianceMap = {};
+                alliancesData.forEach(a => {
+                    allianceMap[a.id] = a.name;
+                });
 
                 if (heroKeys.length === 0 && heroesData.length > 0) {
                     const heroSet = new Set();
@@ -285,11 +295,12 @@
                     const lnc = sub.lancer_level || 'None';
 
                     const troopStrength = calculateTotalTroopStrength(inf, mrc, lnc);
+                    const resolvedAllianceName = sub.alliance_id ? (allianceMap[sub.alliance_id] || 'Unknown Alliance') : 'No Alliance';
 
                     return {
                         player_id: sub.player_id,
                         player_name: sub.player_name || sub.player_id,
-                        alliance_name: sub.alliance_name || '',
+                        alliance_name: resolvedAllianceName,
                         infantry_level: inf,
                         marksman_level: mrc,
                         lancer_level: lnc,
@@ -330,7 +341,7 @@
 
             previewContainer.innerHTML = candidates.map(c => `
                 <div class="flex items-center justify-between bg-slate-900 border border-slate-800 px-3 py-2 rounded text-xs">
-                    <span class="font-medium text-slate-200">${c.player_name} <span class="text-slate-500">[${c.alliance_name || 'No Alliance'}]</span></span>
+                    <span class="font-medium text-slate-200">${c.player_name} <span class="text-slate-500">[${c.alliance_name}]</span></span>
                     <div class="space-x-3 font-mono text-[11px]">
                         <span class="text-cyan-400">Inf: ${c.infantry_level} | Mrc: ${c.marksman_level} | Lnc: ${c.lancer_level}</span>
                         <span class="text-emerald-400">Power: ${c.troop_strength}</span>
@@ -386,7 +397,7 @@
 
                 return `
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-slate-900 border border-slate-800 px-3 py-2 rounded gap-2 text-xs">
-                        <span class="font-medium text-slate-200">${c.player_name} <span class="text-slate-500">[${c.alliance_name || 'No Alliance'}]</span> <span class="text-emerald-400 font-mono ml-2">Score: ${c.troop_strength}</span></span>
+                        <span class="font-medium text-slate-200">${c.player_name} <span class="text-slate-500">[${c.alliance_name}]</span> <span class="text-emerald-400 font-mono ml-2">Score: ${c.troop_strength}</span></span>
                         <div class="flex flex-wrap gap-1.5">${heroBadges}</div>
                     </div>
                 `;
@@ -476,7 +487,7 @@
                             <div class="flex items-center justify-between bg-slate-950 border border-slate-800 p-3 rounded-lg text-xs">
                                 <div class="space-y-0.5">
                                     <div class="font-medium text-slate-200 text-sm">
-                                        ${m.player_name} <span class="text-slate-500 text-xs">[${m.alliance_name || 'No Alliance'}]</span>
+                                        ${m.player_name} <span class="text-slate-500 text-xs">[${m.alliance_name}]</span>
                                         <span class="ml-2 font-mono">${iconStr}</span>
                                     </div>
                                     <div class="text-[11px] text-slate-400 font-mono">Troops: Inf <strong class="text-cyan-400">${m.infantry_level}</strong> | Mrc <strong class="text-cyan-400">${m.marksman_level}</strong> | Lnc <strong class="text-cyan-400">${m.lancer_level}</strong> <span class="text-emerald-400 ml-2">(Score: ${m.troop_strength})</span></div>
