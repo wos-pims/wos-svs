@@ -80,7 +80,7 @@
                     <div>
                         <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
                         <input type="text" id="allianceName" readonly 
-                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm cursor-not-allowed" 
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
                             placeholder="Auto-filled via Check ID">
                     </div>
                 </div>
@@ -500,7 +500,7 @@
                 footer: "Chips ile güçlendirilmiştir 🍟",
                 checkingText: "Kontrol ediliyor...",
                 foundMsg: "Veritabanında bulundu!",
-                newMsg: "Yeni ID veya önbellekte yok."
+                newMsg: "Yeni ID atau önbellekte yok."
             },
             ar: {
                 title: "تسجيل فريق حرب الولايات WoS - بواسطة Pims 🍟",
@@ -697,13 +697,26 @@
                 if (response && response.data && response.data.player_name) {
                     const rec = response.data;
                     nameInput.value = rec.player_name;
-                    allianceInput.value = rec.alliance_name || rec.alliance_tag || '';
+                    
+                    // Robustly catch any property variant returned by the API
+                    const allianceVal = rec.alliance_name || rec.alliance_tag || rec.allianceName || rec.allianceTag || rec.tag || '';
+                    allianceInput.value = allianceVal;
 
                     if (rec.state_number) fetchedStateNum = rec.state_number;
                     if (rec.alliance_id) fetchedAllianceId = rec.alliance_id;
 
                     nameInput.setAttribute('readonly', true);
                     nameInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
+                    
+                    if (allianceVal) {
+                        allianceInput.setAttribute('readonly', true);
+                        allianceInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
+                    } else {
+                        // Fallback: If API didn't return an alliance tag, make it editable
+                        allianceInput.removeAttribute('readonly');
+                        allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
+                        allianceInput.placeholder = "Enter alliance tag";
+                    }
                     
                     statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? t.foundMsg : t.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
@@ -719,6 +732,11 @@
                 nameInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 nameInput.placeholder = "Enter your player name";
                 nameInput.value = "";
+
+                allianceInput.removeAttribute('readonly');
+                allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
+                allianceInput.placeholder = "Enter alliance tag";
+                allianceInput.value = "";
             }
 
             // Pull previously entered player submission record (`svs_player_submissions`)
@@ -735,8 +753,12 @@
                     document.getElementById('marksmanLevel').value = subData.marksman_level || "";
                     document.getElementById('usualName').value = subData.usual_name || "";
                     document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
-                    if (subData.alliance_name) {
-                        allianceInput.value = subData.alliance_name;
+                    
+                    const savedAlliance = subData.alliance_name || subData.alliance_tag;
+                    if (savedAlliance) {
+                        allianceInput.value = savedAlliance;
+                        allianceInput.removeAttribute('readonly');
+                        allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                     }
                 } else {
                     document.getElementById('infantryLevel').value = "";
