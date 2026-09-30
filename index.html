@@ -69,7 +69,7 @@
                     <div id="lookupStatus" class="text-xs mt-1.5 text-slate-400 h-4"></div>
                 </div>
 
-                <!-- Player Name & Alliance Tag (Auto-fetched) -->
+                <!-- Player Name & Alliance Tag (Auto-fetched & Editable fallback) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
@@ -80,7 +80,7 @@
                     <div>
                         <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
                         <input type="text" id="allianceName" readonly 
-                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm cursor-not-allowed" 
                             placeholder="Auto-filled via Check ID">
                     </div>
                 </div>
@@ -94,8 +94,8 @@
                             placeholder="e.g. MainFarmer">
                     </div>
                     <div>
-                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score</label>
-                        <input type="number" id="labyrinthScore" min="0" max="3000" 
+                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score *</label>
+                        <input type="number" id="labyrinthScore" min="0" max="3000" required 
                             class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
                             placeholder="e.g. 1852">
                     </div>
@@ -287,10 +287,10 @@
                 playerNameLabel: "Player Name",
                 playerNamePlaceholder: "Auto-filled via Check ID",
                 allianceLabel: "Alliance Tag",
-                alliancePlaceholder: "Auto-filled via Check ID",
+                alliancePlaceholder: "Auto-filled or enter tag",
                 usualNameLabel: "Usual Name (Optional - in case your current name is a temporary name)",
                 usualNamePlaceholder: "e.g. MainFarmer",
-                labyrinthScoreLabel: "Labyrinth Score",
+                labyrinthScoreLabel: "Labyrinth Score *",
                 labyrinthScorePlaceholder: "e.g. 1850",
                 infantryLabel: "Infantry Level",
                 lancerLabel: "Lancer Level",
@@ -319,10 +319,10 @@
                 playerNameLabel: "Nom du joueur",
                 playerNamePlaceholder: "Rempli automatiquement",
                 allianceLabel: "Tag d'alliance",
-                alliancePlaceholder: "Rempli automatiquement",
-                usualNameLabel: "Nom usuel / Pseudo SvS (Optionnel)",
+                alliancePlaceholder: "Rempli auto ou saisir tag",
+                usualNameLabel: "Nom usuel (Optionnel - au cas où votre nom actuel serait temporaire)",
                 usualNamePlaceholder: "ex: MainFarmer",
-                labyrinthScoreLabel: "Score du Labyrinthe (Max 3000)",
+                labyrinthScoreLabel: "Score du Labyrinthe (Max 3000) *",
                 labyrinthScorePlaceholder: "ex: 2850",
                 infantryLabel: "Niveau Infanterie",
                 lancerLabel: "Niveau Lancier",
@@ -351,10 +351,10 @@
                 playerNameLabel: "Nombre del Jugador",
                 playerNamePlaceholder: "Autorelleno",
                 allianceLabel: "Etiqueta de Alianza",
-                alliancePlaceholder: "Autorelleno",
-                usualNameLabel: "Nombre habitual / Alias SvS (Opcional)",
+                alliancePlaceholder: "Autorelleno o ingresa etiqueta",
+                usualNameLabel: "Nombre habitual (Opcional - por si tu nombre actual es temporal)",
                 usualNamePlaceholder: "ej. MainFarmer",
-                labyrinthScoreLabel: "Puntuación de Laberinto (Máx 3000)",
+                labyrinthScoreLabel: "Puntuación de Laberinto (Máx 3000) *",
                 labyrinthScorePlaceholder: "ej. 2850",
                 infantryLabel: "Nivel de Infantería",
                 lancerLabel: "Nivel de Lancer",
@@ -383,10 +383,10 @@
                 playerNameLabel: "Nome Giocatore",
                 playerNamePlaceholder: "Autoriempito",
                 allianceLabel: "Tag Alleanza",
-                alliancePlaceholder: "Autoriempito",
-                usualNameLabel: "Nome abituale / Alias SvS (Opzionale)",
+                alliancePlaceholder: "Autoriempito o inserisci tag",
+                usualNameLabel: "Nome abituale (Opzionale - nel caso in cui il tuo nome attuale sia temporaneo)",
                 usualNamePlaceholder: "es. MainFarmer",
-                labyrinthScoreLabel: "Punteggio Labirinto (Max 3000)",
+                labyrinthScoreLabel: "Punteggio Labirinto (Max 3000) *",
                 labyrinthScorePlaceholder: "es. 2850",
                 infantryLabel: "Livello Fanteria",
                 lancerLabel: "Livello Lanciere",
@@ -415,10 +415,10 @@
                 playerNameLabel: "プレイヤー名",
                 playerNamePlaceholder: "自動入力",
                 allianceLabel: "同盟タグ",
-                alliancePlaceholder: "自動入力",
-                usualNameLabel: "普段の名前 / SvS用別名（任意）",
+                alliancePlaceholder: "自動入力またはタグを入力",
+                usualNameLabel: "普段の名前（任意 - 現在の名前が一時的な場合）",
                 usualNamePlaceholder: "例: MainFarmer",
-                labyrinthScoreLabel: "ラビリンススコア（最大3000）",
+                labyrinthScoreLabel: "ラビリンススコア（最大3000） *",
                 labyrinthScorePlaceholder: "例: 2850",
                 infantryLabel: "歩兵レベル",
                 lancerLabel: "槍兵レベル",
@@ -447,10 +447,10 @@
                 playerNameLabel: "Nazwa Gracza",
                 playerNamePlaceholder: "Uzupełniane automatycznie",
                 allianceLabel: "Tag Sojuszu",
-                alliancePlaceholder: "Uzupełniane automatycznie",
-                usualNameLabel: "Zwykła nazwa / Alias SvS (Opcjonalnie)",
+                alliancePlaceholder: "Auto lub wpisz tag",
+                usualNameLabel: "Zwykła nazwa (Opcjonalnie - w przypadku gdy Twoja obecna nazwa jest tymczasowa)",
                 usualNamePlaceholder: "np. MainFarmer",
-                labyrinthScoreLabel: "Wynik Labiryntu (Maks 3000)",
+                labyrinthScoreLabel: "Wynik Labiryntu (Maks 3000) *",
                 labyrinthScorePlaceholder: "np. 2850",
                 infantryLabel: "Poziom Piechoty",
                 lancerLabel: "Poziom Lancerów",
@@ -479,10 +479,10 @@
                 playerNameLabel: "Oyuncu Adı",
                 playerNamePlaceholder: "Otomatik doldurulur",
                 allianceLabel: "İttifak Etiketi",
-                alliancePlaceholder: "Otomatik doldurulur",
-                usualNameLabel: "Genel Kullanılan Ad / SvS Takma Adı (İsteğe bağlı)",
+                alliancePlaceholder: "Otomatik veya etiket girin",
+                usualNameLabel: "Genel Kullanılan Ad (İsteğe bağlı - mevcut adınız geçici bir adsa)",
                 usualNamePlaceholder: "örn. MainFarmer",
-                labyrinthScoreLabel: "Labirent Skoru (Maks 3000)",
+                labyrinthScoreLabel: "Labirent Skoru (Maks 3000) *",
                 labyrinthScorePlaceholder: "örn. 2850",
                 infantryLabel: "Piyade Seviyesi",
                 lancerLabel: "Mızraklı Seviyesi",
@@ -511,10 +511,10 @@
                 playerNameLabel: "اسم اللاعب",
                 playerNamePlaceholder: "يتم التعبئة تلقائياً عبر التحقق",
                 allianceLabel: "علامة التحالف",
-                alliancePlaceholder: "يتم التعبئة تلقائياً عبر التحقق",
-                usualNameLabel: "الاسم المعتاد / اللقب في SvS (اختياري)",
+                alliancePlaceholder: "تعبئة تلقائية أو أدخل العلامة",
+                usualNameLabel: "الاسم المعتاد (اختياري - في حال كان اسمك الحالي مؤقتاً)",
                 usualNamePlaceholder: "مثال: MainFarmer",
-                labyrinthScoreLabel: "نقاط المتاهة (الحد الأقصى 3000)",
+                labyrinthScoreLabel: "نقاط المتاهة (الحد الأقصى 3000) *",
                 labyrinthScorePlaceholder: "مثال: 2850",
                 infantryLabel: "مستوى المشاة",
                 lancerLabel: "مستوى الرماح",
@@ -543,10 +543,10 @@
                 playerNameLabel: "玩家昵称",
                 playerNamePlaceholder: "通过 ID 自动填充",
                 allianceLabel: "联盟简称",
-                alliancePlaceholder: "通过 ID 自动填充",
-                usualNameLabel: "常用昵称 / SvS别名（选填）",
+                alliancePlaceholder: "自动填充或输入简称",
+                usualNameLabel: "常用昵称（选填 - 以防您当前的名字是临时名字）",
                 usualNamePlaceholder: "例如 MainFarmer",
-                labyrinthScoreLabel: "迷宫积分（最高 3000）",
+                labyrinthScoreLabel: "迷宫积分（最高 3000） *",
                 labyrinthScorePlaceholder: "例如 2850",
                 infantryLabel: "步兵等级",
                 lancerLabel: "枪兵等级",
@@ -673,9 +673,8 @@
             statusEl.textContent = t.checkingText;
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
             
-            let fetchedStateNum = 2056; // Default fallback state
-            let fetchedAllianceId = 2056000121; // Default fallback alliance ID
-            let fetchedAllianceName = "MNG";
+            let fetchedStateNum = 2056; 
+            let fetchedAllianceId = 2056000121; 
 
             try {
                 // 0. Fetch active next_svs_date from settings table
@@ -688,7 +687,7 @@
                 currentNextSvsDate = settingData ? settingData.value : 'Unknown Date';
                 document.getElementById('battleDateDisplay').textContent = `Next Battle Date: ${currentNextSvsDate}`;
 
-                // 1. Fetch game profile info (Name & Alliance Tag) via Edge Function / Atlas API
+                // 1. Fetch game profile info via Edge Function / Atlas API
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
@@ -698,18 +697,14 @@
                 if (response && response.data && response.data.player_name) {
                     const rec = response.data;
                     nameInput.value = rec.player_name;
-                    allianceInput.value = rec.alliance_name;
+                    allianceInput.value = rec.alliance_name || rec.alliance_tag || '';
 
                     if (rec.state_number) fetchedStateNum = rec.state_number;
                     if (rec.alliance_id) fetchedAllianceId = rec.alliance_id;
-                    if (rec.alliance_name) fetchedAllianceName = rec.alliance_name;
 
                     nameInput.setAttribute('readonly', true);
                     nameInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
                     
-                    allianceInput.setAttribute('readonly', true);
-                    allianceInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
-
                     statusEl.textContent = response.source === 'database_cache' || response.source === 'database' ? t.foundMsg : t.newMsg;
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 } else {
@@ -724,11 +719,6 @@
                 nameInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
                 nameInput.placeholder = "Enter your player name";
                 nameInput.value = "";
-
-                allianceInput.removeAttribute('readonly');
-                allianceInput.className = "w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 text-sm focus:outline-none focus:border-cyan-500 transition-colors";
-                allianceInput.placeholder = "Enter alliance tag";
-                allianceInput.value = "";
             }
 
             // Pull previously entered player submission record (`svs_player_submissions`)
@@ -745,6 +735,9 @@
                     document.getElementById('marksmanLevel').value = subData.marksman_level || "";
                     document.getElementById('usualName').value = subData.usual_name || "";
                     document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
+                    if (subData.alliance_name) {
+                        allianceInput.value = subData.alliance_name;
+                    }
                 } else {
                     document.getElementById('infantryLevel').value = "";
                     document.getElementById('lancerLevel').value = "";
@@ -816,19 +809,18 @@
         document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
 
         // Form Submission handler
-        // Form Submission handler
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
             const feedbackEl = document.getElementById('formFeedback');
             const playerId = Number(document.getElementById('playerId').value.trim());
-            const labyrinthVal = parseInt(document.getElementById('labyrinthScore').value) || 0;
+            const labyrinthVal = parseInt(document.getElementById('labyrinthScore').value);
             const t = translations[currentLang] || translations['en'];
 
             if (!playerId) return;
 
-            if (labyrinthVal > 3000) {
-                alert("Labyrinth score cannot exceed 3000.");
+            if (isNaN(labyrinthVal) || labyrinthVal < 0 || labyrinthVal > 3000) {
+                alert("Labyrinth score is mandatory and must be between 0 and 3000.");
                 return;
             }
 
@@ -839,12 +831,12 @@
 
             const stateNum = 2056;
             const allianceId = 2056000121;
-            const allianceName = document.getElementById('allianceName').value.trim() || "MNG";
 
             // 1. Save combat readiness and submission details to svs_player_submissions
             const submissionPayload = {
                 player_id: playerId,
                 player_name: document.getElementById('playerName').value.trim(),
+                alliance_name: document.getElementById('allianceName').value.trim() || null,
                 usual_name: document.getElementById('usualName').value.trim() || null,
                 labyrinth_score: labyrinthVal,
                 state_id: stateNum,
