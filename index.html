@@ -260,6 +260,9 @@
 
         let currentNextSvsDate = '';
         let currentLang = 'en';
+        // FIXED: Defined fetchedStateNum and fetchedAllianceId at script scope so they are accessible by the submit handler
+        let fetchedStateNum = 2056; 
+        let fetchedAllianceId = 2056000121; 
 
         const heroKeys = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
 
@@ -672,9 +675,6 @@
             localStorage.setItem('wos_player_id', playerId);
             statusEl.textContent = t.checkingText;
             statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
-            
-            let fetchedStateNum = 2056; 
-            let fetchedAllianceId = 2056000121; 
 
             try {
                 // 0. Fetch active next_svs_date from settings table
@@ -752,6 +752,13 @@
                     document.getElementById('usualName').value = subData.usual_name || "";
                     document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
                     
+                    if (subData.alliance_id) {
+                        fetchedAllianceId = subData.alliance_id;
+                    }
+                    if (subData.state_id) {
+                        fetchedStateNum = subData.state_id;
+                    }
+
                     // Fetch alliance name directly from alliances table using alliance_id
                     let resolvedAllianceName = '';
                     if (subData.alliance_id) {
@@ -863,8 +870,19 @@
             submitBtn.disabled = true;
             submitBtn.textContent = t.savingBtn;
 
-            const stateNum = 2056;
-            const allianceId = 2056000121;
+            // Resolve alliance ID: if alliance name/tag was manually modified or entered, check against alliances table
+            let finalAllianceId = fetchedAllianceId;
+            const allianceInputVal = document.getElementById('allianceName').value.trim();
+            if (allianceInputVal) {
+                const { data: allianceMatch } = await supabaseClient
+                    .from('alliances')
+                    .select('id')
+                    .or(`tag.eq.${allianceInputVal},name.eq.${allianceInputVal}`)
+                    .maybeSingle();
+                if (allianceMatch) {
+                    finalAllianceId = allianceMatch.id;
+                }
+            }
 
             // 1. Save combat readiness and submission details to svs_player_submissions
             const submissionPayload = {
@@ -872,8 +890,8 @@
                 player_name: document.getElementById('playerName').value.trim(),
                 usual_name: document.getElementById('usualName').value.trim() || null,
                 labyrinth_score: labyrinthVal,
-                state_id: stateNum,
-                alliance_id: allianceId,
+                state_id: fetchedStateNum,
+                alliance_id: finalAllianceId,
                 infantry_level: document.getElementById('infantryLevel').value,
                 lancer_level: document.getElementById('lancerLevel').value,
                 marksman_level: document.getElementById('marksmanLevel').value,
