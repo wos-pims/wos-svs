@@ -737,11 +737,11 @@
                 allianceInput.value = "";
             }
 
-            // Pull previously entered player submission record (`svs_player_submissions`) joined with `alliances` table
+            // 2. Pull previously entered player submission record
             try {
                 const { data: subData } = await supabaseClient
                     .from('svs_player_submissions')
-                    .select('*, alliances(name)')
+                    .select('*')
                     .eq('player_id', playerId)
                     .maybeSingle();
 
@@ -752,10 +752,23 @@
                     document.getElementById('usualName').value = subData.usual_name || "";
                     document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
                     
-                    // Retrieve alliance name from joined alliances table or fallback columns
-                    const dbAllianceName = subData.alliances?.name || subData.alliance_name || subData.alliance_tag;
-                    if (dbAllianceName) {
-                        allianceInput.value = dbAllianceName;
+                    // Fetch alliance name directly from alliances table using alliance_id
+                    let resolvedAllianceName = '';
+                    if (subData.alliance_id) {
+                        const { data: allianceData } = await supabaseClient
+                            .from('alliances')
+                            .select('name')
+                            .eq('id', subData.alliance_id)
+                            .maybeSingle();
+                        
+                        if (allianceData && allianceData.name) {
+                            resolvedAllianceName = allianceData.name;
+                        }
+                    }
+
+                    const finalAlliance = resolvedAllianceName || subData.alliance_name || subData.alliance_tag;
+                    if (finalAlliance) {
+                        allianceInput.value = finalAlliance;
                         allianceInput.setAttribute('readonly', true);
                         allianceInput.className = "w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed";
                     }
@@ -769,7 +782,7 @@
             } catch (subErr) {
                 console.error("Error loading submissions:", subErr);
             }
-
+            
             // 3. Pull previously saved hero statuses (stars and skill)
             try {
                 const { data: heroData } = await supabaseClient
