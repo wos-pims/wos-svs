@@ -170,8 +170,8 @@
                     <div class="flex justify-between items-center mb-3">
                         <label id="lblHeroesTitle" class="block text-sm font-medium text-slate-300">Heroes Status:</label>
                         <div class="flex space-x-4 rtl:space-x-reverse text-xs text-slate-400 font-medium">
-                            <span class="w-12 text-center">Hero 5★</span>
-                            <span class="w-16 text-center">Skill level 5</span>
+                            <span id="lblHeroStarsCol" class="w-12 text-center">Hero 5★</span>
+                            <span id="lblHeroSkillCol" class="w-16 text-center">Skill level 5</span>
                         </div>
                     </div>
                     <div class="space-y-2" id="heroRows"></div>
@@ -260,7 +260,6 @@
 
         let currentNextSvsDate = '';
         let currentLang = 'en';
-        // FIXED: Defined fetchedStateNum and fetchedAllianceId at script scope so they are accessible by the submit handler
         let fetchedStateNum = 2056; 
         let fetchedAllianceId = 2056000121; 
 
@@ -299,7 +298,9 @@
                 lancerLabel: "Lancer Level",
                 marksmanLabel: "Marksman Level",
                 selectPrompt: "Select...",
-                heroesTitle: "Heroes Status (5-Stars & Skill level 5):",
+                heroesTitle: "Heroes Status:",
+                heroStarsCol: "Hero 5★",
+                heroSkillCol: "Skill level 5",
                 availTitle: "Castle Battle Availability",
                 typeSlots: "Available during specific time slots (select below)",
                 typeUnscheduled: "Participate (can't tell exact time / flexible)",
@@ -331,7 +332,9 @@
                 lancerLabel: "Niveau Lancier",
                 marksmanLabel: "Niveau Tireur",
                 selectPrompt: "Sélectionner...",
-                heroesTitle: "Statut des Héros (5★ & Compétence 5):",
+                heroesTitle: "Statut des Héros :",
+                heroStarsCol: "Héros 5★",
+                heroSkillCol: "Compétence 5",
                 availTitle: "Disponibilité pour la Bataille du Château",
                 typeSlots: "Disponible sur des créneaux précis (sélectionner ci-dessous)",
                 typeUnscheduled: "Je participe (heure exacte flexible)",
@@ -363,7 +366,9 @@
                 lancerLabel: "Nivel de Lancer",
                 marksmanLabel: "Nivel de Tirador",
                 selectPrompt: "Seleccionar...",
-                heroesTitle: "Estado de Héroes (5 Estrellas y Habilidad 5):",
+                heroesTitle: "Estado de Héroes:",
+                heroStarsCol: "Héroe 5★",
+                heroSkillCol: "Habilidad 5",
                 availTitle: "Disponibilidad para la Batalla de Castillo",
                 typeSlots: "Disponible en horarios específicos (seleccionar abajo)",
                 typeUnscheduled: "Participo (horario flexible / no exacto)",
@@ -395,7 +400,9 @@
                 lancerLabel: "Livello Lanciere",
                 marksmanLabel: "Livello Tiratore",
                 selectPrompt: "Seleziona...",
-                heroesTitle: "Stato Eroi (5 Stelle & Abilità 5):",
+                heroesTitle: "Stato Eroi:",
+                heroStarsCol: "Eroe 5★",
+                heroSkillCol: "Abilità 5",
                 availTitle: "Disponibilità Battaglia del Castello",
                 typeSlots: "Disponibile in fasce orarie specifiche (seleziona sotto)",
                 typeUnscheduled: "Partecipo (orario flessibile)",
@@ -427,7 +434,9 @@
                 lancerLabel: "槍兵レベル",
                 marksmanLabel: "弓兵レベル",
                 selectPrompt: "選択...",
-                heroesTitle: "英雄ステータス（星5 & スキル5）:",
+                heroesTitle: "英雄ステータス:",
+                heroStarsCol: "英雄星5",
+                heroSkillCol: "スキルLv.5",
                 availTitle: "要塞戦（キャッスルバトル）の参加可能時間",
                 typeSlots: "特定の時間帯に利用可能（下記で選択）",
                 typeUnscheduled: "参加可能（時間は柔軟に対応）",
@@ -459,7 +468,9 @@
                 lancerLabel: "Poziom Lancerów",
                 marksmanLabel: "Poziom Strzelców",
                 selectPrompt: "Wybierz...",
-                heroesTitle: "Status Bohaterów (5 Gwiazdek i Umiejętność 5):",
+                heroesTitle: "Status Bohaterów:",
+                heroStarsCol: "Bohater 5★",
+                heroSkillCol: "Poziom 5",
                 availTitle: "Dostępność na Bitwę o Zamek",
                 typeSlots: "Dostępny w określonych przedziałach czasowych (wybierz poniżej)",
                 typeUnscheduled: "Biorę udział (elastyczny czas)",
@@ -491,7 +502,9 @@
                 lancerLabel: "Mızraklı Seviyesi",
                 marksmanLabel: "Nişancı Seviyesi",
                 selectPrompt: "Seç...",
-                heroesTitle: "Kahraman Durumu (5 Yıldız & Beceri 5):",
+                heroesTitle: "Kahraman Durumu:",
+                heroStarsCol: "Kahraman 5★",
+                heroSkillCol: "Beceri Seviyesi 5",
                 availTitle: "Kale Savaşı Uygunluğu",
                 typeSlots: "Belirli saat dilimlerinde müsait (aşağıdan seçin)",
                 typeUnscheduled: "Katılıyorum (tam saat esnek)",
@@ -523,7 +536,9 @@
                 lancerLabel: "مستوى الرماح",
                 marksmanLabel: "مستوى الرماة",
                 selectPrompt: "-- اختر المستوى --",
-                heroesTitle: "حالة الأبطال (5 نجوم والمهارة 5):",
+                heroesTitle: "حالة الأبطال:",
+                heroStarsCol: "بطل 5★",
+                heroSkillCol: "مستوى المهارة 5",
                 availTitle: "التوفر لمعركة القلعة",
                 typeSlots: "متاح خلال فترات زمنية محددة (اختر أدناه)",
                 typeUnscheduled: "مشارك (الوقت غير محدد بدقة / مرن)",
@@ -555,7 +570,9 @@
                 lancerLabel: "枪兵等级",
                 marksmanLabel: "弓兵等级",
                 selectPrompt: "请选择...",
-                heroesTitle: "英雄状态（5星 & 技能5）：",
+                heroesTitle: "英雄状态：",
+                heroStarsCol: "英雄 5★",
+                heroSkillCol: "技能等级 5",
                 availTitle: "城堡战（SVSCastle）可用时间",
                 typeSlots: "在特定时段有空（在下方勾选）",
                 typeUnscheduled: "参与（时间灵活/不确定具体点）",
@@ -624,6 +641,9 @@
             document.getElementById('optMarksmanPrompt').textContent = t.selectPrompt;
 
             document.getElementById('lblHeroesTitle').textContent = t.heroesTitle;
+            document.getElementById('lblHeroStarsCol').textContent = t.heroStarsCol;
+            document.getElementById('lblHeroSkillCol').textContent = t.heroSkillCol;
+
             document.getElementById('lblAvailTitle').textContent = t.availTitle;
             document.getElementById('lblTypeSlots').textContent = t.typeSlots;
             document.getElementById('lblTypeUnscheduled').textContent = t.typeUnscheduled;
