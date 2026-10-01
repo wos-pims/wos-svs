@@ -866,8 +866,13 @@
             }
         }
 
-        document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
-        document.getElementById('playerId').addEventListener('blur', fetchPlayerData);
+        //document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
+        document.getElementById('playerId').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                fetchPlayerData();
+            }
+        });
 
         // Form Submission handler
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
