@@ -34,6 +34,7 @@
                     <option value="es">🇪🇸 Español</option>
                     <option value="fr">🇫🇷 Français</option>
                     <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇵🇹 Português</option>
                     <option value="pl">🇵🇱 Polski</option>
                     <option value="tr">🇹🇷 Türkçe</option>
                     <option value="ar">🇸🇦 العربية</option>
@@ -273,6 +274,7 @@
             es: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Héctor', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             fr: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             it: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
+            pt: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             pl: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             tr: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             ar: { bradley: 'برادلي', edith: 'إيديث', gatot: 'غاتوت', hector: 'هكتور', hendricks: 'هيندريكس', jasser: 'جاسر', jessie: 'جيسي', magnus: 'ماغنوس', mia: 'ميا', norah: 'نورا', patrick: 'باتريك', reina: 'رينا', renee: 'رينيه', seo_yoon: 'سيو-يون' },
@@ -319,7 +321,8 @@
             },
             fr: {
                 title: "Inscription SvS WoS - par Pims 🍟",
-                instructions: "Entrez votre ID de chef pour charger vos informations, puis indiquez votre état de préparation, vos héros et vos disponiblités.",
+                instructionsPlayer: "Entrez votre ID de chef pour charger automatiquement vos informations de profil.",
+                instructionsSvs: "Renseignez le niveau de vos troupes, le statut de vos héros et vos disponibilités pour la bataille du château.",
                 playerIdLabel: "ID de Chef",
                 playerIdPlaceholder: "ex: 123456789",
                 lookupBtn: "Vérifier",
@@ -353,7 +356,8 @@
             },
             es: {
                 title: "Registro de equipo SvS WoS - por Pims 🍟",
-                instructions: "Ingresa tu ID de Jefe para cargar tu perfil, luego completa tu disponibilidad y el estado de tus héroes.",
+                instructionsPlayer: "Ingresa tu ID de Jefe para cargar automáticamente la información de tu perfil.",
+                instructionsSvs: "Completa el nivel de tus tropas, el estado de tus héroes y tu disponibilidad para la batalla del castillo.",
                 playerIdLabel: "ID de Jefe",
                 playerIdPlaceholder: "ej. 123456789",
                 lookupBtn: "Verificar",
@@ -387,7 +391,8 @@
             },
             it: {
                 title: "Registrazione Squadra SvS WoS - di Pims 🍟",
-                instructions: "Inserisci il tuo ID Capo per caricare il profilo, quindi compila la disponibilità e lo stato degli eroi.",
+                instructionsPlayer: "Inserisci il tuo ID Capo per caricare automaticamente le informazioni del tuo profilo.",
+                instructionsSvs: "Inserisci il livello delle tue truppe, lo stato degli eroi e la tua disponibilità per la battaglia del castello.",
                 playerIdLabel: "ID Capo",
                 playerIdPlaceholder: "es. 123456789",
                 lookupBtn: "Verifica",
@@ -419,9 +424,45 @@
                 foundMsg: "Trovato nel database!",
                 newMsg: "Nuovo ID o non in cache."
             },
+            pt: {
+                title: "Registro de Equipe SvS WoS - por Pims 🍟",
+                instructionsPlayer: "Insira seu ID de Chefe para carregar automaticamente as informações do seu perfil.",
+                instructionsSvs: "Preencha o nível das suas tropas, o status dos heróis e a disponibilidade para a batalha do castelo.",
+                playerIdLabel: "ID de Chefe do Jogador",
+                playerIdPlaceholder: "ex: 123456789",
+                lookupBtn: "Verificar ID",
+                playerNameLabel: "Nome do Jogador",
+                playerNamePlaceholder: "Preenchido automaticamente",
+                allianceLabel: "Tag da Aliança",
+                alliancePlaceholder: "Preenchido auto ou digite a tag",
+                usualNameLabel: "Também conhecido como",
+                usualNamePlaceholder: "ex: MainFarmer",
+                labyrinthScoreLabel: "Pontuação do Labirinto",
+                labyrinthScorePlaceholder: "ex: 1850",
+                infantryLabel: "Nível de Infantaria",
+                lancerLabel: "Nível de Lanceiro",
+                marksmanLabel: "Nível de Atirador",
+                selectPrompt: "Selecionar...",
+                heroesTitle: "Status dos Heróis:",
+                heroStarsCol: "Herói 5★",
+                heroSkillCol: "Habilidade 5",
+                availTitle: "Disponibilidade para a Batalha do Castelo",
+                typeSlots: "Disponível em horários específicos (selecione abaixo)",
+                typeUnscheduled: "Participar (horário flexível / não exato)",
+                typeOnOff: "Intermitente (Entra e sai)",
+                typeNone: "Não vai participar",
+                selectSlots: "Selecione os horários UTC disponíveis:",
+                submitBtn: "Enviar Registro",
+                savingBtn: "Salvando...",
+                footer: "Desenvolvido por batatas fritas 🍟",
+                checkingText: "Verificando...",
+                foundMsg: "Encontrado no banco de dados!",
+                newMsg: "Novo ID ou não está no cache."
+            },
             ja: {
                 title: "WoS SvS チーム登録 - ピムス 🍟",
-                instructions: "チーフIDを入力してプロフィールを読み込み、部隊レベル、英雄のステータス、城戦の参加可能時間を記入してください。",
+                instructionsPlayer: "チーフIDを入力してプロフィール情報を自動読み込みしてください。",
+                instructionsSvs: "部隊レベル、英雄のステータス、城戦の参加可能時間を入力してください。",
                 playerIdLabel: "チーフID",
                 playerIdPlaceholder: "例: 123456789",
                 lookupBtn: "ID確認",
@@ -455,7 +496,8 @@
             },
             pl: {
                 title: "Rejestracja Drużyny SvS WoS - od Pims 🍟",
-                instructions: "Wpisz swój ID wodza, aby wczytać profil, a następnie uzupełnij gotowość bojową, status bohaterów i dostępność.",
+                instructionsPlayer: "Wpisz swój ID Wodza, aby automatycznie wczytać informacje o profilu.",
+                instructionsSvs: "Wypełnij poziom swoich wojsk, status bohaterów oraz dostępność na bitwę o zamek.",
                 playerIdLabel: "ID Wodza",
                 playerIdPlaceholder: "np. 295897829",
                 lookupBtn: "Sprawdź ID",
@@ -489,7 +531,8 @@
             },
             tr: {
                 title: "WoS SvS Takım Kaydı - Pims 🍟",
-                instructions: "Profil bilgilerinizi otomatik yüklemek için Şef ID'nizi girin, ardından savaş hazırlığınızı, kahraman durumunuzu ve kale savaşı uygunluğunuzu doldurun.",
+                instructionsPlayer: "Profil bilgilerinizi otomatik yüklemek için Şef ID'nizi girin.",
+                instructionsSvs: "Birlik seviyenizi, kahraman durumunuzu ve kale savaşı uygunluğunuzu doldurun.",
                 playerIdLabel: "Şef ID",
                 playerIdPlaceholder: "örn. 295897829",
                 lookupBtn: "ID Kontrol",
@@ -523,7 +566,8 @@
             },
             ar: {
                 title: "تسجيل فريق حرب الولايات WoS - بواسطة Pims 🍟",
-                instructions: "أدخل معرف الشيف الخاص بك لتحميل معلومات ملفك الشخصي تلقائياً، ثم املأ جاهزيتك القتالية، وحالة الأبطال، ومدى توفرك لمعركة القلعة.",
+                instructionsPlayer: "أدخل معرف الشيف الخاص بك لتحميل معلومات ملفك الشخصي تلقائياً.",
+                instructionsSvs: "املأ مستوى قواتك، وحالة الأبطال، ومدى توفرك لمعركة القلعة.",
                 playerIdLabel: "معرف شيف اللاعب (Chief ID)",
                 playerIdPlaceholder: "مثال: 295897829",
                 lookupBtn: "التحقق من المعرف",
@@ -557,7 +601,8 @@
             },
             zh: {
                 title: "WoS SvS 团队注册 - 作者 Pims 🍟",
-                instructions: "请输入您的首领 ID 以自动加载档案信息，然后填写您的兵种等级、英雄状态以及城堡战可用时间。",
+                instructionsPlayer: "输入您的首领 ID 以自动加载您的档案信息。",
+                instructionsSvs: "填写您的兵种等级、英雄状态以及城堡战可用时间。",
                 playerIdLabel: "首领 ID",
                 playerIdPlaceholder: "例如 295897829",
                 lookupBtn: "检查 ID",
@@ -617,7 +662,8 @@
 
             document.getElementById('pageTitle').textContent = t.title;
             document.getElementById('headerTitle').textContent = t.title;
-            document.getElementById('instructionsText').textContent = t.instructions;
+            document.getElementById('instructionsPlayerText').textContent = t.instructionsPlayer;
+            document.getElementById('instructionsSvsText').textContent = t.instructionsSvs;
             
             document.getElementById('lblPlayerId').textContent = t.playerIdLabel;
             document.getElementById('playerId').placeholder = t.playerIdPlaceholder;
