@@ -982,12 +982,12 @@
                 });
             });
             
-            const { error: saveError } = await supabaseClient
+            const { error: heroError } = await supabaseClient
                 .from('player_heroes')
                 .upsert(heroPayloads, { onConflict: 'player_id,hero_name' });
             
-            if (saveError) {
-                console.error('Error saving heroes:', saveError);
+            if (heroError) {
+                console.error('Error saving heroes:', heroError);
             }
 
             // 3. Save Castle Battle Availability
