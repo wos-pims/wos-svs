@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rally Matchmaker Admin Panel</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-light">
+    <div class="container my-5">
+        <h1 class="mb-4">Alliance Rally Matchmaker</h1>
+
+        <!-- Step 1: Configuration Card -->
+        <div class="card bg-secondary text-white p-4 mb-4">
+            <h3>1. Configure Marches</h3>
+            <div class="mb-3">
+                <label for="marchCount" class="form-label">Number of Marches</label>
+                <input type="number" id="marchCount" class="form-control" value="3" min="1" max="10">
+            </div>
+            <button class="btn btn-primary" id="generateFieldsBtn">Generate March Rows</button>
+        </div>
+
+        <!-- Dynamic March Configuration Rows Container -->
+        <div id="marchConfigsContainer" class="mb-4"></div>
+
+        <!-- Step 2: Run Matching -->
+        <button class="btn btn-success btn-lg w-100 mb-5" id="runMatcherBtn" disabled>Calculate Best Matches</button>
+
+        <!-- Results Area -->
+        <div id="resultsArea"></div>
+    </div>
+
+    <!-- Supabase and Matcher Logic Script -->
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        // TODO: Replace with your actual Supabase project URL and anon public key
+        const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const generateBtn = document.getElementById('generateFieldsBtn');
+        const marchCountInput = document.getElementById('marchCount');
+        const container = document.getElementById('marchConfigsContainer');
+        const runMatcherBtn = document.getElementById('runMatcherBtn');
+
+        const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
+
+        generateBtn.addEventListener('click', () => {
+            const count = parseInt(marchCountInput.value);
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= count; i++) {
+                let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
+                availableHeroes.forEach(h => {
+                    heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`;
+                });
+
+                const row = document.createElement('div');
+                row.className = 'card bg-secondary p-3 mb-3 march-row';
+                row.dataset.marchIndex = i;
+                row.innerHTML = `
+                    <h5>March ${i}</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Infantry Ratio (%)</label>
+                            <input type="number" class="form-control inf-ratio" value="60">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Lancer Ratio (%)</label>
+                            <input type="number" class="form-control lancer-ratio" value="40">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Marksman Ratio (%)</label>
+                            <input type="number" class="form-control marksman-ratio" value="0">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">4th Joiner Required Hero</label>
+                            <select class="form-select required-hero">${heroOptions}</select>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(row);
+            }
+            runMatcherBtn.disabled = false;
+        });
+
+        runMatcherBtn.addEventListener('click', async () => {
+            runMatcherBtn.disabled = true;
+            runMatcherBtn.textContent = 'Calculating Matches securely...';
+
+            try {
+                const marchRows = document.querySelectorAll('.march-row');
+                let marchesConfig = [];
+
+                marchRows.forEach(row => {
+                    marchesConfig.push({
+                        index: parseInt(row.dataset.marchIndex),
+                        infRatio: parseFloat(row.querySelector('.inf-ratio').value),
+                        lancerRatio: parseFloat(row.querySelector('.lancer-ratio').value),
+                        marksmanRatio: parseFloat(row.querySelector('.marksman-ratio').value),
+                        requiredHero: row.querySelector('.required-hero').value || null
+                    });
+                });
+
+                // Invoke the private Supabase Edge Function
+                const { data, error } = await supabase.functions.invoke('calculate-matches', {
+                    body: { marches: marchesConfig }
+                });
+
+                if (error) throw error;
+                if (!data.success) throw new Error(data.error);
+
+                // Render Results
+                let resultsHtml = `<div class="card bg-secondary p-4"><h3>Secure Matching Results</h3><ul class="list-group">`;
+                data.results.forEach(res => {
+                    resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary">
+                        <strong>March ${res.marchIndex}:</strong> ${res.assignedPlayer} <span class="text-muted">(Required Hero: ${res.requiredHero})</span>
+                    </li>`;
+                });
+                resultsHtml += `</ul></div>`;
+                document.getElementById('resultsArea').innerHTML = resultsHtml;
+
+            } catch (err) {
+                alert('Error running matcher: ' + err.message);
+            } finally {
+                runMatcherBtn.disabled = false;
+                runMatcherBtn.textContent = 'Calculate Best Matches';
+            }
+        });
+    </script>
+</body>
+</html>
