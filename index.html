@@ -859,32 +859,26 @@
                 console.error("Error loading submissions:", subErr);
             }
             
-            // 3. Pull previously saved hero statuses (stars and skill)
-            try {
-                const { data: heroDataList } = await supabaseClient
-                    .from('player_heroes')
-                    .select('*')
-                    .eq('player_id', playerId);
-
-                // Map records by hero_name for quick lookup
-                const heroMap = {};
-                if (heroDataList && Array.isArray(heroDataList)) {
-                    heroDataList.forEach(row => {
-                        heroMap[row.hero_name] = row;
-                    });
-                }
-
-                heroKeys.forEach(key => {
-                    const starCb = document.getElementById(`hero_${key}_stars`);
-                    const skillCb = document.getElementById(`hero_${key}_skill`);
-                    const heroRecord = heroMap[key];
-
-                    if (starCb) starCb.checked = heroRecord ? !!heroRecord.stars : false;
-                    if (skillCb) skillCb.checked = heroRecord ? !!heroRecord.skill_level : false;
-                });
-            } catch (heroErr) {
-                console.error("Error loading heroes:", heroErr);
+            // 3. Pull all saved hero rows for this player
+            const { data: heroRows, error: heroError } = await supabaseClient
+                .from('player_heroes')
+                .select('*')
+                .eq('player_id', playerId);
+            
+            if (heroError) {
+                console.error('Error fetching heroes:', heroError);
+                return;
             }
+
+            // heroRows is an array: [{ player_id, hero_name, stars, skill_level }, ...]
+            // Loop through them to check the corresponding boxes in your form:
+            heroRows.forEach(row => {
+                const starCheckbox = document.getElementById(`star-${row.hero_name}`);
+                const skillCheckbox = document.getElementById(`skill-${row.hero_name}`);
+                
+                if (starCheckbox) starCheckbox.checked = row.stars;
+                if (skillCheckbox) skillCheckbox.checked = row.skill_level;
+            });
 
             // 4. Pull availability ONLY if battle_date matches currentNextSvsDate
             try {
@@ -974,16 +968,29 @@
                 .upsert(submissionPayload, { onConflict: 'player_id' });
 
             // 2. Save hero selections
-            const heroPayloads = heroKeys.map(key => ({
-                player_id: playerId,
-                hero_name: key,
-                stars: document.getElementById(`hero_${key}_stars`).checked,
-                skill_level: document.getElementById(`hero_${key}_skill`).checked
-            }));
-
-            const { error: heroError } = await supabaseClient
+            const heroPayloads = [];
+            
+            allHeroNames.forEach(heroName => {
+                const starsChecked = document.getElementById(`star-${heroName}`)?.checked || false;
+                const skillChecked = document.getElementById(`skill-${heroName}`)?.checked || false;
+            
+                // Only include if at least one is true, or push all if you want to clear/reset unselected ones
+                heroPayloads.push({
+                    player_id: playerId,
+                    hero_name: heroName,
+                    stars: starsChecked,
+                    skill_level: skillChecked
+                });
+            });
+            
+            // Bulk upsert using the composite primary key constraint for conflict resolution
+            const { error: saveError } = await supabaseClient
                 .from('player_heroes')
-                .upsert(heroPayloads, { onConflict: 'player_id,hero_name' });
+                .upsert(heroPayloads, { onConflict: 'player_id, hero_name' });
+            
+            if (saveError) {
+                console.error('Error saving heroes:', saveError);
+            }
 
             // 3. Save Castle Battle Availability
             const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
