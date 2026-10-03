@@ -941,7 +941,7 @@
                 const { data: allianceMatch } = await supabaseClient
                     .from('alliances')
                     .select('id')
-                    .or(`tag.eq.${allianceInputVal},name.eq.${allianceInputVal}`)
+                    .or(`name.eq.${allianceInputVal}`)
                     .maybeSingle();
                 if (allianceMatch) {
                     finalAllianceId = allianceMatch.id;
@@ -984,7 +984,7 @@
             // Bulk upsert using the composite primary key constraint for conflict resolution
             const { error: saveError } = await supabaseClient
                 .from('player_heroes')
-                .upsert(heroPayloads, { onConflict: 'player_id, hero_name' });
+                .upsert(heroPayloads, { onConflict: 'player_heroes_pkey' });
             
             if (saveError) {
                 console.error('Error saving heroes:', saveError);
