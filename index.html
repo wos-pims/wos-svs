@@ -48,8 +48,8 @@
     <main class="max-w-xl mx-auto px-4 py-8 w-full flex-grow">
         <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
             
-            <p id="instructionsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
-                Enter your Chief ID to auto-load your profile information, then fill in your combat readiness, hero statuses, and castle battle availability.
+            <p id="instructionsPlayerText" class="text-sm text-slate-400 mb-6 leading-relaxed">
+                Enter your Chief ID to auto-load your profile information.
             </p>
 
             <form id="svsForm" class="space-y-6">
@@ -84,7 +84,9 @@
                             placeholder="Auto-filled via Check ID">
                     </div>
                 </div>
-
+                <p id="instructionsSvsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
+                    Fill in your troops level, hero statuses, and castle battle availability.
+                </p>
                 <!-- Usual Name & Labyrinth Score -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -282,7 +284,8 @@
         const translations = {
             en: {
                 title: "WoS SvS Team Registration - by Pims 🍟",
-                instructions: "Enter your Chief ID to auto-load your profile information, then fill in your combat readiness, hero statuses, and castle battle availability.",
+                instructionsPlayer: "Enter your Chief ID to auto-load your profile information.",
+                instructionsSvs: "Fill in your troops level, hero statuses, and castle battle availability.",
                 playerIdLabel: "Player Chief ID",
                 playerIdPlaceholder: "e.g. 123456789",
                 lookupBtn: "Check ID",
