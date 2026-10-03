@@ -861,23 +861,26 @@
             
             // 3. Pull previously saved hero statuses (stars and skill)
             try {
-                const { data: heroData } = await supabaseClient
-                    .from('svs_heroes')
+                const { data: heroDataList } = await supabaseClient
+                    .from('player_heroes')
                     .select('*')
-                    .eq('player_id', playerId)
-                    .maybeSingle();
+                    .eq('player_id', playerId);
+
+                // Map records by hero_name for quick lookup
+                const heroMap = {};
+                if (heroDataList && Array.isArray(heroDataList)) {
+                    heroDataList.forEach(row => {
+                        heroMap[row.hero_name] = row;
+                    });
+                }
 
                 heroKeys.forEach(key => {
                     const starCb = document.getElementById(`hero_${key}_stars`);
                     const skillCb = document.getElementById(`hero_${key}_skill`);
-                    
-                    if (heroData) {
-                        if (starCb) starCb.checked = !!heroData[`${key}_stars`];
-                        if (skillCb) skillCb.checked = !!heroData[`${key}_skill`];
-                    } else {
-                        if (starCb) starCb.checked = false;
-                        if (skillCb) skillCb.checked = false;
-                    }
+                    const heroRecord = heroMap[key];
+
+                    if (starCb) starCb.checked = heroRecord ? !!heroRecord.stars : false;
+                    if (skillCb) skillCb.checked = heroRecord ? !!heroRecord.skill_level : false;
                 });
             } catch (heroErr) {
                 console.error("Error loading heroes:", heroErr);
@@ -971,18 +974,16 @@
                 .upsert(submissionPayload, { onConflict: 'player_id' });
 
             // 2. Save hero selections
-            const heroPayload = {
+            const heroPayloads = heroKeys.map(key => ({
                 player_id: playerId,
-                updated_at: new Date()
-            };
-            heroKeys.forEach(key => {
-                heroPayload[`${key}_stars`] = document.getElementById(`hero_${key}_stars`).checked;
-                heroPayload[`${key}_skill`] = document.getElementById(`hero_${key}_skill`).checked;
-            });
+                hero_name: key,
+                stars: document.getElementById(`hero_${key}_stars`).checked,
+                skill_level: document.getElementById(`hero_${key}_skill`).checked
+            }));
 
             const { error: heroError } = await supabaseClient
-                .from('svs_heroes')
-                .upsert(heroPayload, { onConflict: 'player_id' });
+                .from('player_heroes')
+                .upsert(heroPayloads, { onConflict: 'player_id,hero_name' });
 
             // 3. Save Castle Battle Availability
             const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
