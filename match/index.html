@@ -35,15 +35,14 @@
         <div id="resultsArea"></div>
     </div>
 
-    <!-- Script -->
+    <!-- Script Container -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // TODO: Replace with your actual Supabase credentials
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
 
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const generateBtn = document.getElementById('generateFieldsBtn');
         const marchCountInput = document.getElementById('marchCount');
@@ -57,7 +56,7 @@
         battleDateInput.valueAsDate = new Date();
 
         generateBtn.addEventListener('click', () => {
-            const count = parseInt(marchCountInput.value);
+            const count = parseInt(marchCountInput.value) || 1;
             container.innerHTML = '';
             
             for (let i = 1; i <= count; i++) {
