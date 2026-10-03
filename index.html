@@ -871,10 +871,9 @@
             }
 
             // heroRows is an array: [{ player_id, hero_name, stars, skill_level }, ...]
-            // Loop through them to check the corresponding boxes in your form:
             heroRows.forEach(row => {
-                const starCheckbox = document.getElementById(`star-${row.hero_name}`);
-                const skillCheckbox = document.getElementById(`skill-${row.hero_name}`);
+                const starCheckbox = document.getElementById(`hero_${row.hero_name}_stars`);
+                const skillCheckbox = document.getElementById(`hero_${row.hero_name}_skill`);
                 
                 if (starCheckbox) starCheckbox.checked = row.stars;
                 if (skillCheckbox) skillCheckbox.checked = row.skill_level;
@@ -970,11 +969,10 @@
             // 2. Save hero selections
             const heroPayloads = [];
             
-            allHeroNames.forEach(heroName => {
-                const starsChecked = document.getElementById(`star-${heroName}`)?.checked || false;
-                const skillChecked = document.getElementById(`skill-${heroName}`)?.checked || false;
+            heroKeys.forEach(heroName => {
+                const starsChecked = document.getElementById(`hero_${heroName}_stars`)?.checked || false;
+                const skillChecked = document.getElementById(`hero_${heroName}_skill`)?.checked || false;
             
-                // Only include if at least one is true, or push all if you want to clear/reset unselected ones
                 heroPayloads.push({
                     player_id: playerId,
                     hero_name: heroName,
