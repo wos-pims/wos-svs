@@ -43,7 +43,7 @@
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
 
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const generateBtn = document.getElementById('generateFieldsBtn');
         const marchCountInput = document.getElementById('marchCount');
