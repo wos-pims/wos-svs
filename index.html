@@ -982,10 +982,9 @@
                 });
             });
             
-            // Bulk upsert using the composite primary key constraint for conflict resolution
             const { error: saveError } = await supabaseClient
                 .from('player_heroes')
-                .upsert(heroPayloads, { onConflict: 'player_heroes_pkey' });
+                .upsert(heroPayloads, { onConflict: 'player_id,hero_name' });
             
             if (saveError) {
                 console.error('Error saving heroes:', saveError);
