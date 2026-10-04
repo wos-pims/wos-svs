@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoS SvS Rally Matchmaker - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, sans-serif; }
+        .card-custom { background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .form-control, .form-select { background-color: #1f2937; border: 1px solid #374151; color: #f3f4f6; }
+        .form-control:focus, .form-select:focus { background-color: #1f2937; border-color: #0ea5e9; color: #f3f4f6; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+        .btn-primary-custom { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; color: white; font-weight: 600; }
+        .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
+        .badge-unsure { background-color: #78350f; color: #fde68a; }
+        .badge-no { background-color: #7f1d1d; color: #fecaca; }
+    </style>
+</head>
+<body>
+
+    <div id="adminContainer" class="container py-5" style="max-width: 900px;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
+                <span class="fs-6 text-info">Admin Panel</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div id="battleDateDisplay" class="badge bg-secondary px-3 py-2 fs-6">Loading Battle Date...</div>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+            </div>
+        </div>
+
+        <div class="card card-custom p-4 mb-4">
+            <h4 class="text-info mb-3">Player Availability Overview</h4>
+            
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-secondary mb-2">Available Time Slots</h6>
+                        <ul id="timeslotStatsList" class="list-unstyled small mb-0">
+                            <li class="text-muted">Loading counts...</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-secondary mb-2">Unsure Players</h6>
+                        <div class="d-flex justify-content-between mb-1 small">
+                            <span>Flexible / Unscheduled:</span>
+                            <span id="countUnscheduled" class="badge badge-unsure">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span>On and Off:</span>
+                            <span id="countOnAndOff" class="badge badge-unsure">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-secondary mb-2">Unavailable Players</h6>
+                        <div class="d-flex justify-content-between align-items-center small">
+                            <span>Won't participate (No):</span>
+                            <span id="countNo" class="badge badge-no fs-6">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-3">
+
+            <div class="mb-3">
+                <label for="marchCount" class="form-label fw-semibold">How many rallies do you want?</label>
+                <input type="number" id="marchCount" class="form-control w-25" value="1" min="1" max="10">
+            </div>
+            <button class="btn btn-primary-custom btn-lg w-100" id="generateFieldsBtn">Generate March Configuration Rows</button>
+        </div>
+
+        <div id="marchConfigsContainer" class="mb-4"></div>
+        <button class="btn btn-success btn-lg w-100 mb-5 py-3 fw-bold shadow" id="runMatcherBtn" disabled>Calculate Rally Matches</button>
+        <div id="resultsArea"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        const generateBtn = document.getElementById('generateFieldsBtn');
+        const marchCountInput = document.getElementById('marchCount');
+        const container = document.getElementById('marchConfigsContainer');
+        const runMatcherBtn = document.getElementById('runMatcherBtn');
+        const battleDateBadge = document.getElementById('battleDateDisplay');
+
+        const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
+        let currentBattleDate = null;
+
+        // Security Guard: Verify session and database whitelist immediately
+        async function protectRoute() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const { data: adminRecord, error } = await supabase
+                .from('admin_users')
+                .select('*')
+                .eq('email', session.user.email)
+                .maybeSingle();
+
+            if (!adminRecord || error) {
+                await supabase.auth.signOut();
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // If valid, log success once per session and initialize panel
+            if (!sessionStorage.getItem('session_logged')) {
+                await supabase.from('admin_login_logs').insert({
+                    user_id: session.user.id,
+                    email: session.user.email,
+                    discord_username: session.user.user_metadata?.full_name || 'Unknown',
+                    status: 'success'
+                });
+                sessionStorage.setItem('session_logged', 'true');
+            }
+
+            initAdminPanel();
+        }
+
+        protectRoute();
+
+        logoutBtn.addEventListener('click', async () => {
+            sessionStorage.clear();
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        });
+
+        async function initAdminPanel() {
+            try {
+                const { data: settingData, error: settingError } = await supabase
+                    .from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+                if (settingError || !settingData) throw new Error();
+                currentBattleDate = settingData.value;
+                battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
+
+                const { data: availData } = await supabase
+                    .from('svs_availability').select('*').eq('battle_date', currentBattleDate);
+
+                let slotCounts = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
+                (availData || []).forEach(row => {
+                    const pType = (row.participation_type || '').toLowerCase();
+                    if (pType === 'no') noCount++;
+                    else if (pType === 'unscheduled') unscheduledCount++;
+                    else if (pType === 'on_and_off') onAndOffCount++;
+                    else {
+                        let slots = row.time_slots;
+                        if (typeof slots === 'string') { try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; } }
+                        if (Array.isArray(slots)) { slots.forEach(s => slotCounts[s] = (slotCounts[s] || 0) + 1); }
+                    }
+                });
+
+                const slotListEl = document.getElementById('timeslotStatsList');
+                if (Object.keys(slotCounts).length > 0) {
+                    slotListEl.innerHTML = '';
+                    for (const [slot, count] of Object.entries(slotCounts)) {
+                        slotListEl.innerHTML += `<li class="d-flex justify-content-between mb-1"><span>${slot}:</span> <span class="badge badge-slot">${count} players</span></li>`;
+                    }
+                } else {
+                    slotListEl.innerHTML = `<li class="text-muted">No specific time slots recorded.</li>`;
+                }
+
+                document.getElementById('countUnscheduled').textContent = unscheduledCount;
+                document.getElementById('countOnAndOff').textContent = onAndOffCount;
+                document.getElementById('countNo').textContent = noCount;
+            } catch (err) {
+                battleDateBadge.textContent = 'Error loading date';
+            }
+        }
+
+        generateBtn.addEventListener('click', () => {
+            const count = parseInt(marchCountInput.value) || 1;
+            container.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
+                availableHeroes.forEach(h => heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`);
+
+                const row = document.createElement('div');
+                row.className = 'card card-custom p-4 mb-3 march-row';
+                row.dataset.marchIndex = i;
+                row.innerHTML = `
+                    <h5 class="text-warning mb-3">March ${i} Configuration</h5>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control inf-ratio" value="60"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control lancer-ratio" value="40"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Marksman Ratio (%)</label><input type="number" class="form-control marksman-ratio" value="0"></div>
+                    </div>
+                    <h6 class="text-light mt-3 mb-2">4 Joiner Hero Requirements</h6>
+                    <div class="row g-3">
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 1</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 2</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 3</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 4</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                    </div>`;
+                container.appendChild(row);
+            }
+            runMatcherBtn.disabled = false;
+        });
+
+        runMatcherBtn.addEventListener('click', async () => {
+            if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
+            runMatcherBtn.disabled = true;
+            runMatcherBtn.textContent = 'Calculating Optimal Matches...';
+
+            try {
+                const marchRows = document.querySelectorAll('.march-row');
+                let marchesConfig = [];
+                marchRows.forEach(row => {
+                    const inf = parseFloat(row.querySelector('.inf-ratio').value) || 0;
+                    const lancer = parseFloat(row.querySelector('.lancer-ratio').value) || 0;
+                    const marksman = parseFloat(row.querySelector('.marksman-ratio').value) || 0;
+                    const joinerHeroes = Array.from(row.querySelectorAll('.joiner-hero')).map(sel => sel.value || null);
+                    marchesConfig.push({ index: parseInt(row.dataset.marchIndex), ratios: { inf, lancer, marksman }, joinerHeroes });
+                });
+
+                const { data, error } = await supabase.functions.invoke('calculate-matches', {
+                    body: { battleDate: currentBattleDate, marches: marchesConfig }
+                });
+                if (error) throw error;
+                if (!data.success) throw new Error(data.error);
+
+                let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
+                data.results.forEach(res => {
+                    resultsHtml += `<div class="card bg-dark text-white p-3 mb-3 border border-secondary"><h5 class="text-warning">March ${res.marchIndex}</h5><p class="mb-2"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p><ul class="list-group mt-2">`;
+                    res.joiners.forEach(j => {
+                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center"><span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span><span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span></li>`;
+                    });
+                    resultsHtml += `</ul></div>`;
+                });
+                resultsHtml += `</div>`;
+                document.getElementById('resultsArea').innerHTML = resultsHtml;
+            } catch (err) {
+                alert('Error running matcher: ' + err.message);
+            } finally {
+                runMatcherBtn.disabled = false;
+                runMatcherBtn.textContent = 'Calculate Rally Matches';
+            }
+        });
+    </script>
+</body>
+</html>
