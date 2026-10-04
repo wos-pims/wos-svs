@@ -12,7 +12,7 @@
         .form-control:focus, .form-select:focus { background-color: #1f2937; border-color: #0ea5e9; color: #f3f4f6; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
         .btn-primary-custom { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; color: white; font-weight: 600; }
         .badge-slot { background-color: #1e3a8a; color: #bfdbfe; font-size: 0.7rem; padding: 0.2em 0.4em; }
-        .badge-unsure { background-color: #78350f; color: #fde68a; }
+        .badge-unsure { background-color: #78350f; color: #fde68a; font-size: 0.65rem; padding: 0.2em 0.4em; }
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
         
         /* Compact Single-Line Timeline Layout */
@@ -288,9 +288,34 @@
 
                 let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3 fs-5">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
                 data.results.forEach(res => {
-                    resultsHtml += `<div class="card bg-dark text-white p-3 mb-3 border border-secondary"><h5 class="text-warning fs-6">March ${res.marchIndex}</h5><p class="mb-2 small"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p><ul class="list-group mt-2">`;
+                    const leaderBadge = res.rallyLeaderStatus === 'Slot Confirmed' 
+                        ? `<span class="badge badge-slot">Slot Confirmed</span>` 
+                        : `<span class="badge badge-unsure">${res.rallyLeaderStatus}</span>`;
+
+                    resultsHtml += `
+                        <div class="card bg-dark text-white p-3 mb-3 border border-secondary">
+                            <h5 class="text-warning fs-6">March ${res.marchIndex}</h5>
+                            <p class="mb-2 small d-flex justify-content-between align-items-center">
+                                <span><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</span>
+                                ${leaderBadge}
+                            </p>
+                            <ul class="list-group mt-2">`;
+                    
                     res.joiners.forEach(j => {
-                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center small py-2"><span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span><span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span></li>`;
+                        const joinerBadge = j.status === 'Slot Confirmed' 
+                            ? `<span class="badge badge-slot">Slot Confirmed</span>` 
+                            : `<span class="badge badge-unsure">${j.status}</span>`;
+
+                        resultsHtml += `
+                            <li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center small py-2">
+                                <div>
+                                    <span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span>
+                                    <div class="text-muted" style="font-size: 0.75rem;">Hero Req: ${j.requiredHero}</div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    ${joinerBadge}
+                                </div>
+                            </li>`;
                     });
                     resultsHtml += `</ul></div>`;
                 });
