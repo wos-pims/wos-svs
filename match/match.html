@@ -18,7 +18,7 @@
 </head>
 <body>
 
-    <div id="adminContainer" class="container py-5" style="max-width: 900px;">
+    <div class="container py-5" style="max-width: 900px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
@@ -99,7 +99,6 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // Security Guard: Verify session and database whitelist immediately
         async function protectRoute() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -107,27 +106,11 @@
                 return;
             }
 
-            const { data: adminRecord, error } = await supabase
-                .from('admin_users')
-                .select('*')
-                .eq('email', session.user.email)
-                .maybeSingle();
-
-            if (!adminRecord || error) {
+            const { data, error } = await supabase.functions.invoke('login');
+            if (error || !data?.authorized) {
                 await supabase.auth.signOut();
                 window.location.href = 'index.html';
                 return;
-            }
-
-            // If valid, log success once per session and initialize panel
-            if (!sessionStorage.getItem('session_logged')) {
-                await supabase.from('admin_login_logs').insert({
-                    user_id: session.user.id,
-                    email: session.user.email,
-                    discord_username: session.user.user_metadata?.full_name || 'Unknown',
-                    status: 'success'
-                });
-                sessionStorage.setItem('session_logged', 'true');
             }
 
             initAdminPanel();
@@ -136,7 +119,6 @@
         protectRoute();
 
         logoutBtn.addEventListener('click', async () => {
-            sessionStorage.clear();
             await supabase.auth.signOut();
             window.location.href = 'index.html';
         });
