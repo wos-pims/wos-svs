@@ -22,7 +22,7 @@
 <body>
 
     <!-- AUTHENTICATION GATE CONTAINER -->
-    <div id="authContainer" class="container d-flex justify-content-center align-items-center vh-100" style="display: none !important;">
+    <div id="authContainer" class="container d-flex justify-content-center align-items-center vh-100">
         <div class="card card-custom p-5 text-center" style="max-width: 400px; width: 100%;">
             <h3 class="fw-bold mb-3">🔒 Restricted Access</h3>
             <p id="authMessage" class="text-muted small mb-4">You must authenticate with Discord to access the alliance matchmaker admin controls.</p>
@@ -32,11 +32,11 @@
         </div>
     </div>
 
-    <!-- MAIN ADMIN PANEL -->
+    <!-- MAIN ADMIN PANEL (Hidden by default) -->
     <div id="adminContainer" class="container py-5" style="max-width: 900px; display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-light mb-0">🛡️️ Alliance Rally Matchmaker</h2>
+                <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
                 <span class="fs-6 text-info">Admin Panel</span>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -121,44 +121,31 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // Check for OAuth errors in URL (e.g. user clicked cancel or was denied)
-        async function checkUrlForAuthErrors() {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const searchParams = new URLSearchParams(window.location.search);
+        // --- AUTHORIZATION CHECK ---
+        async function isUserAuthorized(user) {
+            if (!user) return false;
             
-            const error = hashParams.get('error') || searchParams.get('error');
-            const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
+            // OPTION A: Check against an allowed whitelist table if you have one (e.g., table 'admin_whitelist' with column 'email' or 'discord_id')
+            /*
+            const { data, error } = await supabase
+                .from('admin_whitelist')
+                .select('*')
+                .eq('email', user.email)
+                .maybeSingle();
+            if (error || !data) return false;
+            return true;
+            */
 
-            if (error) {
-                authMessage.innerHTML = `<span class="text-danger">Login failed: ${errorDescription || error}</span>`;
-                
-                // Log the denied/failed attempt
-                await supabase.from('admin_login_logs').insert({
-                    discord_username: `Denied/Failed (${error})`,
-                    status: 'denied'
-                }).catch(() => {});
-
-                // Clean URL parameters
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+            // OPTION B: Temporary email check until you set up a table
+            const allowedEmails = ['wos.pims@gmail.com']; // Add your exact admin email here
+            return allowedEmails.includes(user.email);
         }
 
-        // Log login states
         async function logAttempt(status, user = null) {
             try {
-                const sessionKey = `logged_${status}_${user ? user.id : 'anon'}`;
-                if (sessionStorage.getItem(sessionKey)) return;
-
-                let discordName = 'Anonymous Attempt';
-                let userId = null;
-                let email = null;
-
-                if (user) {
-                    userId = user.id;
-                    email = user.email || null;
-                    const meta = user.user_metadata || {};
-                    discordName = meta.full_name || meta.name || meta.preferred_username || 'Unknown Discord User';
-                }
+                let discordName = user ? (user.user_metadata?.full_name || user.user_metadata?.name || 'Unknown User') : 'Anonymous Attempt';
+                let userId = user ? user.id : null;
+                let email = user ? user.email : null;
 
                 await supabase.from('admin_login_logs').insert({
                     user_id: userId,
@@ -166,16 +153,13 @@
                     discord_username: discordName,
                     status: status
                 });
-
-                sessionStorage.setItem(sessionKey, 'true');
             } catch (err) {
                 console.error('Logging error:', err.message);
             }
         }
 
-        // Trigger Login & log attempt
+        // Trigger Login
         discordLoginBtn.addEventListener('click', async () => {
-            await logAttempt('attempt');
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'discord',
                 options: { redirectTo: window.location.origin + window.location.pathname }
@@ -183,40 +167,49 @@
             if (error) alert('Login error: ' + error.message);
         });
 
-        // Auth State Listener
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                authContainer.style.display = 'none';
-                adminContainer.style.display = 'block';
-                if (event === 'SIGNED_IN') {
-                    await logAttempt('success', session.user);
-                }
-                initAdminPanel();
-            } else {
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            window.location.reload();
+        });
+
+        // App Initialization & Session Validation
+        async function handleSession() {
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                // Not logged in: keep admin hidden, make zero background queries
                 authContainer.style.display = 'flex';
                 adminContainer.style.display = 'none';
+                return;
             }
-        });
 
-        logoutBtn.addEventListener('click', async () => {
-            sessionStorage.clear();
-            await supabase.auth.signOut();
-        });
+            // User has a session, verify if they are authorized
+            const authorized = await isUserAuthorized(session.user);
 
-        // Initialize on load
-        checkUrlForAuthErrors().then(() => {
-            supabase.auth.getSession().then(({ data: { session } }) => {
-                if (session) {
-                    authContainer.style.display = 'none';
-                    adminContainer.style.display = 'block';
-                    logAttempt('success', session.user);
-                    initAdminPanel();
-                } else {
-                    authContainer.style.display = 'flex';
-                    adminContainer.style.display = 'none';
+            if (authorized) {
+                // Authorized: Log success once per session and show admin panel
+                if (!sessionStorage.getItem('session_logged')) {
+                    await logAttempt('success', session.user);
+                    sessionStorage.setItem('session_logged', 'true');
                 }
-            });
-        });
+                authContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                initAdminPanel();
+            } else {
+                // Logged into Discord, but NOT on the whitelist -> Denied
+                await logAttempt('denied', session.user);
+                await supabase.auth.signOut();
+                
+                authContainer.style.display = 'flex';
+                adminContainer.style.display = 'none';
+                authMessage.innerHTML = `<span class="text-danger">Access Denied: Your account (${session.user.email}) is not authorized to access this panel.</span>`;
+                
+                // Clean URL hash tokens
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        handleSession();
 
         async function initAdminPanel() {
             try {
