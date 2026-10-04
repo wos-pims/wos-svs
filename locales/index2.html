@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">WoS SvS Team Registration - by Pims 🍟</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: { 500: '#0ea5e9', 600: '#0284c7' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-cyan-500 selection:text-white">
+
+    <!-- Header & Language Selector -->
+    <header class="w-full border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+            <h1 id="headerTitle" class="font-bold text-lg text-cyan-400 tracking-wide">WoS SvS Team Registration - by Pims 🍟</h1>
+            <div class="flex items-center space-x-2 rtl:space-x-reverse">
+                <span class="text-xs text-slate-400">🌐</span>
+                <select id="langSwitch" class="bg-slate-800 text-slate-200 text-sm rounded-lg border border-slate-700 px-2.5 py-1.5 focus:outline-none focus:border-cyan-500">
+                    <option value="en">🇺🇸 English</option>
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="it">🇮🇹 Italiano</option>
+                    <option value="pt">🇵🇹 Português</option>
+                    <option value="pl">🇵🇱 Polski</option>
+                    <option value="tr">🇹🇷 Türkçe</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="ja">🇯🇵 日本語</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-xl mx-auto px-4 py-8 w-full flex-grow">
+        <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 shadow-xl backdrop-blur-sm">
+            
+            <p id="instructionsPlayerText" class="text-sm text-slate-400 mb-6 leading-relaxed">
+                Enter your Chief ID to auto-load your profile information.
+            </p>
+
+            <form id="svsForm" class="space-y-6">
+                
+                <!-- Player ID & Lookup -->
+                <div>
+                    <label id="lblPlayerId" class="block text-sm font-medium text-slate-300 mb-1.5">Player ID</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="playerId" required 
+                            class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. 295897829">
+                        <button type="button" id="lookupBtn" 
+                            class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-sm px-4 py-2.5 rounded-lg transition-colors">
+                            Check ID
+                        </button>
+                    </div>
+                    <div id="lookupStatus" class="text-xs mt-1.5 text-slate-400 h-4"></div>
+                </div>
+
+                <!-- Player Name & Alliance Tag -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
+                        <input type="text" id="playerName" readonly 
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                            placeholder="Auto-filled via Check ID">
+                    </div>
+                    <div>
+                        <label id="lblAlliance" class="block text-sm font-medium text-slate-300 mb-1.5">Alliance Tag</label>
+                        <input type="text" id="allianceName" readonly 
+                            class="w-full bg-slate-950/60 border border-slate-800 rounded-lg px-3.5 py-2.5 text-slate-400 text-sm cursor-not-allowed" 
+                            placeholder="Auto-filled via Check ID">
+                    </div>
+                </div>
+
+                <p id="instructionsSvsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
+                    Fill in your troops level, hero statuses, and castle battle availability.
+                </p>
+
+                <!-- Usual Name & Labyrinth Score -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label id="lblUsualName" class="block text-sm font-medium text-slate-300 mb-1.5">Also known as</label>
+                        <input type="text" id="usualName" maxlength="50"
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. MainFarmer">
+                    </div>
+                    <div>
+                        <label id="lblLabyrinthScore" class="block text-sm font-medium text-slate-300 mb-1.5">Labyrinth Score</label>
+                        <input type="number" id="labyrinthScore" min="0" max="3000" required 
+                            class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
+                            placeholder="e.g. 1852">
+                    </div>
+                </div>
+
+                <!-- Troop Levels Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                    <div>
+                        <label id="lblInfantry" class="block text-xs font-medium text-slate-300 mb-1">Infantry Level</label>
+                        <select id="infantryLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                    </div>
+                    <div>
+                        <label id="lblLancer" class="block text-xs font-medium text-slate-300 mb-1">Lancer Level</label>
+                        <select id="lancerLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                    </div>
+                    <div>
+                        <label id="lblMarksman" class="block text-xs font-medium text-slate-300 mb-1">Marksman Level</label>
+                        <select id="marksmanLevel" required class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyan-500"></select>
+                    </div>
+                </div>
+
+                <!-- Heroes Section -->
+                <div class="border-t border-slate-800 pt-5">
+                    <div class="flex justify-between items-center mb-3">
+                        <label id="lblHeroesTitle" class="block text-sm font-medium text-slate-300">Heroes Status:</label>
+                        <div class="flex space-x-4 rtl:space-x-reverse text-xs text-slate-400 font-medium">
+                            <span id="lblHeroStarsCol" class="w-12 text-center">Hero 5★</span>
+                            <span id="lblHeroSkillCol" class="w-16 text-center">Skill level 5</span>
+                        </div>
+                    </div>
+                    <div class="space-y-2" id="heroRows"></div>
+                </div>
+
+                <!-- Castle Battle Availability Section -->
+                <div class="border-t border-slate-800 pt-5">
+                    <div class="mb-3">
+                        <label id="lblAvailTitle" class="block text-sm font-medium text-slate-300">Castle Battle Availability</label>
+                        <p class="text-xs text-cyan-400 mt-0.5" id="battleDateDisplay">Next Battle Date: Loading...</p>
+                    </div>
+
+                    <div class="space-y-2.5 mb-4 text-sm text-slate-300">
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
+                            <input type="radio" name="participationType" value="slots" id="typeSlots" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span id="lblTypeSlots">Available during specific time slots (select below)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
+                            <input type="radio" name="participationType" value="unscheduled" id="typeUnscheduled" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span id="lblTypeUnscheduled">Participate (can't tell exact time / flexible)</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
+                            <input type="radio" name="participationType" value="on_and_off" id="typeOnOff" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span id="lblTypeOnOff">On and off</span>
+                        </label>
+                        <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
+                            <input type="radio" name="participationType" value="none" id="typeNone" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
+                            <span id="lblTypeNone">Won't participate at all</span>
+                        </label>
+                    </div>
+
+                    <div id="timeSlotsContainer" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 space-y-2 hidden">
+                        <span id="lblSelectSlots" class="block text-xs font-medium text-slate-400 mb-2">Select available 1-hour UTC slots:</span>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300" id="timeSlotsGrid"></div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-2">
+                    <button type="submit" id="submitBtn" 
+                        class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-medium text-sm py-3 rounded-lg shadow-lg shadow-cyan-900/30 transition-all">
+                        Submit Registration
+                    </button>
+                </div>
+
+                <div id="formFeedback" class="text-center text-sm font-medium h-6"></div>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+        <p id="footerText">Powered by chips 🍟</p>
+    </footer>
+
+    <!-- Main Application Script Module -->
+    <script type="module">
+        import { heroKeys, heroNamesLocalized, translations } from './translations.js';
+
+        const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentNextSvsDate = '';
+        let currentLang = 'en';
+
+        const troopLevels = [
+            { value: "FC10 helios", label: "FC10 helios" },
+            { value: "FC10", label: "FC10" },
+            { value: "FC9 helios", label: "FC9 helios" },
+            { value: "FC9", label: "FC9" },
+            { value: "FC8 helios", label: "FC8 helios" },
+            { value: "FC8", label: "FC8" },
+            { value: "FC7", label: "FC7" },
+            { value: "FC6", label: "FC6" },
+            { value: "FC5", label: "FC5" },
+            { value: "FC4", label: "FC4" },
+            { value: "FC3", label: "FC3" },
+            { value: "FC2", label: "FC2" },
+            { value: "FC1", label: "FC1" },
+            { value: "not_FC", label: "Under FC1" }
+        ];
+
+        const timeSlotOptions = ["12:00-13:00", "13:00-14:00", "14:00-15:00", "15:00-16:00", "16:00-17:00"];
+
+        function getTranslation(key) {
+            const langDict = translations[currentLang] || translations['en'];
+            return langDict[key] || translations['en'][key] || key;
+        }
+
+        function populateSelects() {
+            ['infantryLevel', 'lancerLevel', 'marksmanLevel'].forEach(id => {
+                const el = document.getElementById(id);
+                const currentVal = el.value;
+                el.innerHTML = `<option value="" disabled selected>${getTranslation('selectPrompt')}</option>` + 
+                    troopLevels.map(t => `<option value="${t.value}">${t.label}</option>`).join('');
+                el.value = currentVal;
+            });
+        }
+
+        function populateTimeSlots() {
+            document.getElementById('timeSlotsGrid').innerHTML = timeSlotOptions.map(slot => `
+                <label class="flex items-center space-x-2 rtl:space-x-reverse cursor-pointer">
+                    <input type="checkbox" value="${slot}" class="time-slot-checkbox rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500">
+                    <span>${slot} UTC</span>
+                </label>
+            `).join('');
+        }
+
+        function renderHeroes() {
+            const container = document.getElementById('heroRows');
+            container.innerHTML = '';
+            const localizedNames = heroNamesLocalized[currentLang] || heroNamesLocalized['en'];
+
+            heroKeys.forEach(key => {
+                const displayName = localizedNames[key] || key;
+                const row = document.createElement('div');
+                row.className = "flex justify-between items-center bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-800/80 text-xs text-slate-300";
+                row.innerHTML = `
+                    <span class="font-medium">${displayName}</span>
+                    <div class="flex space-x-6 rtl:space-x-reverse pr-2">
+                        <input type="checkbox" id="hero_${key}_stars" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
+                        <input type="checkbox" id="hero_${key}_skill" class="w-4 h-4 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500 cursor-pointer">
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function applyTranslations() {
+            document.getElementById('pageTitle').textContent = getTranslation('title');
+            document.getElementById('headerTitle').textContent = getTranslation('title');
+            document.getElementById('instructionsPlayerText').textContent = getTranslation('instructionsPlayer');
+            document.getElementById('instructionsSvsText').textContent = getTranslation('instructionsSvs');
+            document.getElementById('lblPlayerId').textContent = getTranslation('playerIdLabel');
+            document.getElementById('playerId').placeholder = getTranslation('playerIdPlaceholder');
+            document.getElementById('lookupBtn').textContent = getTranslation('lookupBtn');
+            document.getElementById('lblPlayerName').textContent = getTranslation('playerNameLabel');
+            document.getElementById('playerName').placeholder = getTranslation('playerNamePlaceholder');
+            document.getElementById('lblAlliance').textContent = getTranslation('allianceLabel');
+            document.getElementById('allianceName').placeholder = getTranslation('alliancePlaceholder');
+            document.getElementById('lblUsualName').textContent = getTranslation('usualNameLabel');
+            document.getElementById('usualName').placeholder = getTranslation('usualNamePlaceholder');
+            document.getElementById('lblLabyrinthScore').textContent = getTranslation('labyrinthScoreLabel');
+            document.getElementById('labyrinthScore').placeholder = getTranslation('labyrinthScorePlaceholder');
+            document.getElementById('lblInfantry').textContent = getTranslation('infantryLabel');
+            document.getElementById('lblLancer').textContent = getTranslation('lancerLabel');
+            document.getElementById('lblMarksman').textContent = getTranslation('marksmanLabel');
+            document.getElementById('lblHeroesTitle').textContent = getTranslation('heroesTitle');
+            document.getElementById('lblHeroStarsCol').textContent = getTranslation('heroStarsCol');
+            document.getElementById('lblHeroSkillCol').textContent = getTranslation('heroSkillCol');
+            document.getElementById('lblAvailTitle').textContent = getTranslation('availTitle');
+            document.getElementById('lblTypeSlots').textContent = getTranslation('typeSlots');
+            document.getElementById('lblTypeUnscheduled').textContent = getTranslation('typeUnscheduled');
+            document.getElementById('lblTypeOnOff').textContent = getTranslation('typeOnOff');
+            document.getElementById('lblTypeNone').textContent = getTranslation('typeNone');
+            document.getElementById('lblSelectSlots').textContent = getTranslation('selectSlots');
+            document.getElementById('submitBtn').textContent = getTranslation('submitBtn');
+            document.getElementById('footerText').textContent = getTranslation('footer');
+
+            populateSelects();
+            renderHeroes();
+        }
+
+        document.getElementById('langSwitch').addEventListener('change', (e) => {
+            currentLang = e.target.value;
+            document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            applyTranslations();
+            const existingId = document.getElementById('playerId').value.trim();
+            if (existingId) fetchPlayerData();
+        });
+
+        document.querySelectorAll('input[name="participationType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const slotsContainer = document.getElementById('timeSlotsContainer');
+                if (e.target.value === 'slots') {
+                    slotsContainer.classList.remove('hidden');
+                } else {
+                    slotsContainer.classList.add('hidden');
+                    document.querySelectorAll('.time-slot-checkbox').forEach(cb => cb.checked = false);
+                }
+            });
+        });
+
+        async function fetchPlayerData() {
+            const playerId = document.getElementById('playerId').value.trim();
+            const statusEl = document.getElementById('lookupStatus');
+            if (!playerId) return;
+
+            localStorage.setItem('wos_player_id', playerId);
+            statusEl.textContent = getTranslation('checkingText');
+            statusEl.className = "text-xs mt-1.5 text-slate-400 h-4";
+
+            try {
+                const { data: settingData } = await supabaseClient
+                    .from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+
+                currentNextSvsDate = settingData ? settingData.value : 'Unknown Date';
+                document.getElementById('battleDateDisplay').textContent = `Next Battle Date: ${currentNextSvsDate}`;
+
+                const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
+                    body: { player_id: Number(playerId) }
+                });
+
+                if (error) throw error;
+
+                if (response?.data?.player_name) {
+                    const rec = response.data;
+                    document.getElementById('playerName').value = rec.player_name;
+                    document.getElementById('allianceName').value = rec.alliance_name || rec.alliance_tag || '';
+
+                    statusEl.textContent = getTranslation('foundMsg');
+                    statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
+                }
+            } catch (err) {
+                statusEl.textContent = "Player not found. Enter details manually.";
+                statusEl.className = "text-xs mt-1.5 text-amber-400 h-4";
+            }
+        }
+
+        document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
+
+        document.getElementById('svsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const feedbackEl = document.getElementById('formFeedback');
+            const playerId = Number(document.getElementById('playerId').value.trim());
+            const labyrinthVal = parseInt(document.getElementById('labyrinthScore').value);
+
+            if (!playerId || isNaN(labyrinthVal) || labyrinthVal < 0 || labyrinthVal > 3000) {
+                alert("Please verify your ID and ensure Labyrinth Score is between 0 and 3000.");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = getTranslation('savingBtn');
+
+            const payload = {
+                player_id: playerId,
+                player_name: document.getElementById('playerName').value.trim(),
+                usual_name: document.getElementById('usualName').value.trim().slice(0, 50) || null,
+                labyrinth_score: labyrinthVal,
+                infantry_level: document.getElementById('infantryLevel').value,
+                lancer_level: document.getElementById('lancerLevel').value,
+                marksman_level: document.getElementById('marksmanLevel').value
+            };
+
+            const { error } = await supabaseClient.functions.invoke('save-registration', {
+                body: payload
+            });
+
+            if (error) {
+                feedbackEl.textContent = `Error: ${error.message}`;
+                feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
+            } else {
+                feedbackEl.textContent = "Saved successfully!";
+                feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = getTranslation('submitBtn');
+        });
+
+        // Initialize App
+        populateTimeSlots();
+        applyTranslations();
+        const savedPlayerId = localStorage.getItem('wos_player_id');
+        if (savedPlayerId) {
+            document.getElementById('playerId').value = savedPlayerId;
+            fetchPlayerData();
+        }
+    </script>
+</body>
+</html>
