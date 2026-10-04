@@ -336,7 +336,10 @@
 
                 if (error) throw error;
 
-                if (response?.data?.player_name) {
+                if (response.found === false || result.source === 'not_found') {
+                    document.getElementById('player_name').value = '';
+                    document.getElementById('alliance_tag').value = '';
+                } else {
                     const rec = response.data;
                     document.getElementById('playerName').value = rec.player_name;
                     document.getElementById('allianceName').value = rec.alliance_name || rec.alliance_tag || '';
@@ -353,45 +356,73 @@
         document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
 
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const feedbackEl = document.getElementById('formFeedback');
-            const playerId = Number(document.getElementById('playerId').value.trim());
-            const labyrinthVal = parseInt(document.getElementById('labyrinthScore').value);
-
-            if (!playerId || isNaN(labyrinthVal) || labyrinthVal < 0 || labyrinthVal > 3000) {
-                alert("Please verify your ID and ensure Labyrinth Score is between 0 and 3000.");
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = getTranslation('savingBtn');
-
-            const payload = {
-                player_id: playerId,
-                player_name: document.getElementById('playerName').value.trim(),
-                usual_name: document.getElementById('usualName').value.trim().slice(0, 50) || null,
-                labyrinth_score: labyrinthVal,
-                infantry_level: document.getElementById('infantryLevel').value,
-                lancer_level: document.getElementById('lancerLevel').value,
-                marksman_level: document.getElementById('marksmanLevel').value
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitBtn');
+        const feedbackEl = document.getElementById('formFeedback');
+        
+        const playerId = document.getElementById('playerId').value.trim();
+        const labyrinthVal = document.getElementById('labyrinthScore').value;
+    
+        submitBtn.disabled = true;
+        submitBtn.textContent = getTranslation('savingBtn');
+        feedbackEl.textContent = "";
+    
+        // Gather selected participation type
+        const participationType = document.querySelector('input[name="participationType"]:checked')?.value || 'unscheduled';
+    
+        // Gather selected time slots if applicable
+        const timeSlots = [];
+        if (participationType === 'slots') {
+            document.querySelectorAll('.time-slot-checkbox:checked').forEach(cb => {
+                timeSlots.push(cb.value);
+            });
+        }
+    
+        // Gather heroes status dynamically
+        const heroesData = {};
+        heroKeys.forEach(key => {
+            const starsEl = document.getElementById(`hero_${key}_stars`);
+            const skillEl = document.getElementById(`hero_${key}_skill`);
+            heroesData[key] = {
+                stars: starsEl ? starsEl.checked : false,
+                skill: skillEl ? skillEl.checked : false
             };
-
-            const { error } = await supabaseClient.functions.invoke('save-registration', {
+        });
+    
+        const payload = {
+            player_id: Number(playerId),
+            player_name: document.getElementById('playerName').value.trim(),
+            usual_name: document.getElementById('usualName').value.trim(),
+            labyrinth_score: parseInt(labyrinthVal, 10),
+            infantry_level: document.getElementById('infantryLevel').value,
+            lancer_level: document.getElementById('lancerLevel').value,
+            marksman_level: document.getElementById('marksmanLevel').value,
+            participation_type: participationType,
+            time_slots: timeSlots,
+            heroes: heroesData
+        };
+    
+        try {
+            const { data, error } = await supabaseClient.functions.invoke('save-registration', {
                 body: payload
             });
-
-            if (error) {
-                feedbackEl.textContent = `Error: ${error.message}`;
-                feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
-            } else {
+    
+            if (error) throw error;
+    
+            if (data && data.success) {
                 feedbackEl.textContent = "Saved successfully!";
                 feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
+            } else {
+                throw new Error(data?.error || "Unknown error occurred.");
             }
-
+        } catch (err) {
+            feedbackEl.textContent = `Error: ${err.message}`;
+            feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
+        } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = getTranslation('submitBtn');
-        });
+        }
+    });
 
         // Initialize App
         populateTimeSlots();
