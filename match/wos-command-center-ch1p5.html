@@ -14,12 +14,50 @@
         .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
         .badge-unsure { background-color: #78350f; color: #fde68a; }
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
-        .timeline-scroll { max-height: 300px; overflow-y: auto; }
+        
+        /* Timeline Block Layout */
+        .timeline-scroll-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 0.75rem;
+            scrollbar-width: thin;
+            scrollbar-color: #374151 #111827;
+        }
+        .timeline-block {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 10px;
+            min-width: 240px;
+            max-width: 260px;
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .timeline-block-header {
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+            color: #bfdbfe;
+            padding: 0.75rem 1rem;
+            font-weight: bold;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timeline-block-body {
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #d1d5db;
+            max-height: 220px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
 
-    <div class="container py-5" style="max-width: 900px;">
+    <div class="container py-5" style="max-width: 1000px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
@@ -34,20 +72,19 @@
         <div class="card card-custom p-4 mb-4">
             <h4 class="text-info mb-3">Player Availability Overview</h4>
 
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
-                        <h6 class="text-secondary mb-2">Available Time Slots (Timeline)</h6>
-                        <ul id="timeslotStatsList" class="list-unstyled small mb-0 timeline-scroll">
-                            <li class="text-muted">Loading timeline...</li>
-                        </ul>
-                    </div>
+            <!-- Timeline Blocks Section (Full Width Flow) -->
+            <div class="mb-4">
+                <h6 class="text-secondary mb-2">Available Time Slots (Timeline)</h6>
+                <div id="timeslotTimelineContainer" class="timeline-scroll-container">
+                    <div class="text-muted small p-2">Loading timeline...</div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Unsure Players</h6>
-                        <div class="d-flex justify-content-between mb-1 small">
+                        <div class="d-flex justify-content-between mb-2 small">
                             <span>Flexible / Unscheduled:</span>
                             <span id="countUnscheduled" class="badge badge-unsure">0</span>
                         </div>
@@ -58,7 +95,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Unavailable Players</h6>
                         <div class="d-flex justify-content-between align-items-center small">
@@ -132,14 +169,27 @@
                 currentBattleDate = settingData.value;
                 battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
 
-                const { data: availData } = await supabase
-                    .from('svs_availability').select('*').eq('battle_date', currentBattleDate);
+                const [availRes, playersRes] = await Promise.all([
+                    supabase.from('svs_availability').select('*').eq('battle_date', currentBattleDate),
+                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name')
+                ]);
+
+                const playerMap = {};
+                (playersRes.data || []).forEach(p => {
+                    const pName = p.player_name || '';
+                    const uName = p.usual_name || '';
+                    if (uName) {
+                        playerMap[p.player_id] = pName ? `${pName} (${uName})` : uName;
+                    } else {
+                        playerMap[p.player_id] = pName || 'Unknown Player';
+                    }
+                });
 
                 let slotPlayers = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
                 
-                (availData || []).forEach(row => {
+                (availRes.data || []).forEach(row => {
                     const pType = (row.participation_type || '').toLowerCase();
-                    const playerName = row.player_name || row.name || row.username || 'Unknown Player';
+                    const playerName = playerMap[row.player_id] || 'Unknown Player';
 
                     if (pType === 'no') noCount++;
                     else if (pType === 'unscheduled') unscheduledCount++;
@@ -156,24 +206,26 @@
                     }
                 });
 
-                const slotListEl = document.getElementById('timeslotStatsList');
+                const timelineContainer = document.getElementById('timeslotTimelineContainer');
                 const sortedSlots = Object.keys(slotPlayers).sort();
 
                 if (sortedSlots.length > 0) {
-                    slotListEl.innerHTML = '';
+                    timelineContainer.innerHTML = '';
                     sortedSlots.forEach(slot => {
-                        const playersStr = slotPlayers[slot].join(', ');
-                        slotListEl.innerHTML += `
-                            <li class="mb-2 pb-2 border-bottom border-secondary">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <strong class="text-info">${slot}</strong>
+                        const playersListHtml = slotPlayers[slot].map(p => `<div>• ${p}</div>`).join('');
+                        timelineContainer.innerHTML += `
+                            <div class="timeline-block">
+                                <div class="timeline-block-header">
+                                    <span>${slot}</span>
                                     <span class="badge badge-slot">${slotPlayers[slot].length}</span>
                                 </div>
-                                <div class="text-light small mt-1">${playersStr}</div>
-                            </li>`;
+                                <div class="timeline-block-body">
+                                    ${playersListHtml}
+                                </div>
+                            </div>`;
                     });
                 } else {
-                    slotListEl.innerHTML = `<li class="text-muted">No specific time slots recorded.</li>`;
+                    timelineContainer.innerHTML = `<div class="text-muted small p-2">No specific time slots recorded.</div>`;
                 }
 
                 document.getElementById('countUnscheduled').textContent = unscheduledCount;
