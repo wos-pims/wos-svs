@@ -7,48 +7,13 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #0b0f19;
-            color: #f3f4f6;
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        }
-        .card-custom {
-            background-color: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
-        }
-        .form-control, .form-select {
-            background-color: #1f2937;
-            border: 1px solid #374151;
-            color: #f3f4f6;
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: #1f2937;
-            border-color: #0ea5e9;
-            color: #f3f4f6;
-            box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25);
-        }
-        .btn-primary-custom {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            border: none;
-            color: white;
-            font-weight: 600;
-        }
-        .btn-primary-custom:hover {
-            background: linear-gradient(135deg, #0284c7, #0369a1);
-            color: white;
-        }
-        .btn-discord {
-            background-color: #5865F2;
-            border: none;
-            color: white;
-            font-weight: 600;
-        }
-        .btn-discord:hover {
-            background-color: #4752C4;
-            color: white;
-        }
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, -apple-system, sans-serif; }
+        .card-custom { background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .form-control, .form-select { background-color: #1f2937; border: 1px solid #374151; color: #f3f4f6; }
+        .form-control:focus, .form-select:focus { background-color: #1f2937; border-color: #0ea5e9; color: #f3f4f6; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+        .btn-primary-custom { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; color: white; font-weight: 600; }
+        .btn-discord { background-color: #5865F2; border: none; color: white; font-weight: 600; }
+        .btn-discord:hover { background-color: #4752C4; color: white; }
         .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
         .badge-unsure { background-color: #78350f; color: #fde68a; }
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
@@ -60,7 +25,7 @@
     <div id="authContainer" class="container d-flex justify-content-center align-items-center vh-100" style="display: none !important;">
         <div class="card card-custom p-5 text-center" style="max-width: 400px; width: 100%;">
             <h3 class="fw-bold mb-3">🔒 Restricted Access</h3>
-            <p class="text-muted small mb-4">You must authenticate with Discord to access the alliance matchmaker admin controls.</p>
+            <p id="authMessage" class="text-muted small mb-4">You must authenticate with Discord to access the alliance matchmaker admin controls.</p>
             <button id="discordLoginBtn" class="btn btn-discord btn-lg py-2 w-100 shadow">
                 Login with Discord
             </button>
@@ -71,7 +36,7 @@
     <div id="adminContainer" class="container py-5" style="max-width: 900px; display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-light mb-0">🛡️ Alliance Rally Matchmaker</h2>
+                <h2 class="fw-bold text-light mb-0">🛡️️ Alliance Rally Matchmaker</h2>
                 <span class="fs-6 text-info">Admin Panel</span>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -128,13 +93,8 @@
             <button class="btn btn-primary-custom btn-lg w-100" id="generateFieldsBtn">Generate March Configuration Rows</button>
         </div>
 
-        <!-- Dynamic March Configuration Rows Container -->
         <div id="marchConfigsContainer" class="mb-4"></div>
-
-        <!-- Run Matching Button -->
         <button class="btn btn-success btn-lg w-100 mb-5 py-3 fw-bold shadow" id="runMatcherBtn" disabled>Calculate Rally Matches</button>
-
-        <!-- Results Area -->
         <div id="resultsArea"></div>
     </div>
 
@@ -144,13 +104,13 @@
 
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const authContainer = document.getElementById('authContainer');
         const adminContainer = document.getElementById('adminContainer');
         const discordLoginBtn = document.getElementById('discordLoginBtn');
         const logoutBtn = document.getElementById('logoutBtn');
+        const authMessage = document.getElementById('authMessage');
 
         const generateBtn = document.getElementById('generateFieldsBtn');
         const marchCountInput = document.getElementById('marchCount');
@@ -161,38 +121,76 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // Function to log the login attempt into admin_login_logs table
-        async function logUserLogin(user) {
+        // Check for OAuth errors in URL (e.g. user clicked cancel or was denied)
+        async function checkUrlForAuthErrors() {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const searchParams = new URLSearchParams(window.location.search);
+            
+            const error = hashParams.get('error') || searchParams.get('error');
+            const errorDescription = hashParams.get('error_description') || searchParams.get('error_description');
+
+            if (error) {
+                authMessage.innerHTML = `<span class="text-danger">Login failed: ${errorDescription || error}</span>`;
+                
+                // Log the denied/failed attempt
+                await supabase.from('admin_login_logs').insert({
+                    discord_username: `Denied/Failed (${error})`,
+                    status: 'denied'
+                }).catch(() => {});
+
+                // Clean URL parameters
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        // Log login states
+        async function logAttempt(status, user = null) {
             try {
-                // Prevent duplicate logging within the same session persistence window
-                const sessionKey = `logged_${user.id}`;
+                const sessionKey = `logged_${status}_${user ? user.id : 'anon'}`;
                 if (sessionStorage.getItem(sessionKey)) return;
 
-                const metadata = user.user_metadata || {};
-                const discordName = metadata.full_name || metadata.name || metadata.preferred_username || 'Unknown Discord User';
+                let discordName = 'Anonymous Attempt';
+                let userId = null;
+                let email = null;
+
+                if (user) {
+                    userId = user.id;
+                    email = user.email || null;
+                    const meta = user.user_metadata || {};
+                    discordName = meta.full_name || meta.name || meta.preferred_username || 'Unknown Discord User';
+                }
 
                 await supabase.from('admin_login_logs').insert({
-                    user_id: user.id,
-                    email: user.email || null,
-                    discord_username: discordName
+                    user_id: userId,
+                    email: email,
+                    discord_username: discordName,
+                    status: status
                 });
 
                 sessionStorage.setItem(sessionKey, 'true');
             } catch (err) {
-                console.error('Failed to write login log:', err.message);
+                console.error('Logging error:', err.message);
             }
         }
 
-        // Auth State Handler
+        // Trigger Login & log attempt
+        discordLoginBtn.addEventListener('click', async () => {
+            await logAttempt('attempt');
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+                options: { redirectTo: window.location.origin + window.location.pathname }
+            });
+            if (error) alert('Login error: ' + error.message);
+        });
+
+        // Auth State Listener
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 authContainer.style.display = 'none';
                 adminContainer.style.display = 'block';
-                
                 if (event === 'SIGNED_IN') {
-                    await logUserLogin(session.user);
+                    await logAttempt('success', session.user);
                 }
-                
                 initAdminPanel();
             } else {
                 authContainer.style.display = 'flex';
@@ -200,81 +198,47 @@
             }
         });
 
-        // Trigger Discord Login
-        discordLoginBtn.addEventListener('click', async () => {
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: 'discord',
-                options: {
-                    redirectTo: window.location.origin + window.location.pathname
-                }
-            });
-            if (error) alert('Login error: ' + error.message);
-        });
-
-        // Logout
         logoutBtn.addEventListener('click', async () => {
             sessionStorage.clear();
             await supabase.auth.signOut();
         });
 
-        // Initial check on page load
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session) {
-                authContainer.style.display = 'none';
-                adminContainer.style.display = 'block';
-                logUserLogin(session.user);
-                initAdminPanel();
-            } else {
-                authContainer.style.display = 'flex';
-                adminContainer.style.display = 'none';
-            }
+        // Initialize on load
+        checkUrlForAuthErrors().then(() => {
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session) {
+                    authContainer.style.display = 'none';
+                    adminContainer.style.display = 'block';
+                    logAttempt('success', session.user);
+                    initAdminPanel();
+                } else {
+                    authContainer.style.display = 'flex';
+                    adminContainer.style.display = 'none';
+                }
+            });
         });
 
         async function initAdminPanel() {
             try {
                 const { data: settingData, error: settingError } = await supabase
-                    .from('settings')
-                    .select('value')
-                    .eq('key', 'next_svs_date')
-                    .maybeSingle();
-
-                if (settingError || !settingData) {
-                    throw new Error('Could not fetch next_svs_date from settings table.');
-                }
-
+                    .from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+                if (settingError || !settingData) throw new Error();
                 currentBattleDate = settingData.value;
                 battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
 
-                const { data: availData, error: availError } = await supabase
-                    .from('svs_availability')
-                    .select('*')
-                    .eq('battle_date', currentBattleDate);
+                const { data: availData } = await supabase
+                    .from('svs_availability').select('*').eq('battle_date', currentBattleDate);
 
-                if (availError) throw availError;
-
-                let slotCounts = {};
-                let unscheduledCount = 0;
-                let onAndOffCount = 0;
-                let noCount = 0;
-
+                let slotCounts = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
                 (availData || []).forEach(row => {
                     const pType = (row.participation_type || '').toLowerCase();
-                    if (pType === 'no') {
-                        noCount++;
-                    } else if (pType === 'unscheduled') {
-                        unscheduledCount++;
-                    } else if (pType === 'on_and_off') {
-                        onAndOffCount++;
-                    } else {
+                    if (pType === 'no') noCount++;
+                    else if (pType === 'unscheduled') unscheduledCount++;
+                    else if (pType === 'on_and_off') onAndOffCount++;
+                    else {
                         let slots = row.time_slots;
-                        if (typeof slots === 'string') {
-                            try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; }
-                        }
-                        if (Array.isArray(slots)) {
-                            slots.forEach(slot => {
-                                slotCounts[slot] = (slotCounts[slot] || 0) + 1;
-                            });
-                        }
+                        if (typeof slots === 'string') { try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; } }
+                        if (Array.isArray(slots)) { slots.forEach(s => slotCounts[s] = (slotCounts[s] || 0) + 1); }
                     }
                 });
 
@@ -291,9 +255,7 @@
                 document.getElementById('countUnscheduled').textContent = unscheduledCount;
                 document.getElementById('countOnAndOff').textContent = onAndOffCount;
                 document.getElementById('countNo').textContent = noCount;
-
             } catch (err) {
-                console.error('Error initializing admin panel:', err);
                 battleDateBadge.textContent = 'Error loading date';
             }
         }
@@ -301,121 +263,64 @@
         generateBtn.addEventListener('click', () => {
             const count = parseInt(marchCountInput.value) || 1;
             container.innerHTML = '';
-            
             for (let i = 1; i <= count; i++) {
                 let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
-                availableHeroes.forEach(h => {
-                    heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`;
-                });
+                availableHeroes.forEach(h => heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`);
 
                 const row = document.createElement('div');
                 row.className = 'card card-custom p-4 mb-3 march-row';
                 row.dataset.marchIndex = i;
                 row.innerHTML = `
                     <h5 class="text-warning mb-3">March ${i} Configuration</h5>
-                    
                     <div class="row g-3 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label small text-secondary">Infantry Ratio (%)</label>
-                            <input type="number" class="form-control inf-ratio" value="60">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-secondary">Lancer Ratio (%)</label>
-                            <input type="number" class="form-control lancer-ratio" value="40">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small text-secondary">Marksman Ratio (%)</label>
-                            <input type="number" class="form-control marksman-ratio" value="0">
-                        </div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control inf-ratio" value="60"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control lancer-ratio" value="40"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Marksman Ratio (%)</label><input type="number" class="form-control marksman-ratio" value="0"></div>
                     </div>
-
                     <h6 class="text-light mt-3 mb-2">4 Joiner Hero Requirements</h6>
                     <div class="row g-3">
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Joiner 1</label>
-                            <select class="form-select joiner-hero">${heroOptions}</select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Joiner 2</label>
-                            <select class="form-select joiner-hero">${heroOptions}</select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Joiner 3</label>
-                            <select class="form-select joiner-hero">${heroOptions}</select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Joiner 4</label>
-                            <select class="form-select joiner-hero">${heroOptions}</select>
-                        </div>
-                    </div>
-                `;
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 1</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 2</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 3</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 4</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                    </div>`;
                 container.appendChild(row);
             }
             runMatcherBtn.disabled = false;
         });
 
         runMatcherBtn.addEventListener('click', async () => {
-            if (!currentBattleDate) {
-                alert('Battle date is not loaded yet.');
-                return;
-            }
-
+            if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
             runMatcherBtn.disabled = true;
             runMatcherBtn.textContent = 'Calculating Optimal Matches...';
 
             try {
                 const marchRows = document.querySelectorAll('.march-row');
                 let marchesConfig = [];
-
                 marchRows.forEach(row => {
                     const inf = parseFloat(row.querySelector('.inf-ratio').value) || 0;
                     const lancer = parseFloat(row.querySelector('.lancer-ratio').value) || 0;
                     const marksman = parseFloat(row.querySelector('.marksman-ratio').value) || 0;
-
-                    const joinerHeroSelects = row.querySelectorAll('.joiner-hero');
-                    let joinerHeroes = Array.from(joinerHeroSelects).map(sel => sel.value || null);
-
-                    marchesConfig.push({
-                        index: parseInt(row.dataset.marchIndex),
-                        ratios: { inf, lancer, marksman },
-                        joinerHeroes: joinerHeroes
-                    });
+                    const joinerHeroes = Array.from(row.querySelectorAll('.joiner-hero')).map(sel => sel.value || null);
+                    marchesConfig.push({ index: parseInt(row.dataset.marchIndex), ratios: { inf, lancer, marksman }, joinerHeroes });
                 });
 
                 const { data, error } = await supabase.functions.invoke('calculate-matches', {
-                    body: { 
-                        battleDate: currentBattleDate,
-                        marches: marchesConfig 
-                    }
+                    body: { battleDate: currentBattleDate, marches: marchesConfig }
                 });
-
                 if (error) throw error;
                 if (!data.success) throw new Error(data.error);
 
-                let resultsHtml = `<div class="card card-custom p-4">
-                    <h3 class="text-success mb-3">Rally Match Results</h3>
-                    <p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
-                
+                let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
                 data.results.forEach(res => {
-                    resultsHtml += `
-                        <div class="card bg-dark text-white p-3 mb-3 border border-secondary">
-                            <h5 class="text-warning">March ${res.marchIndex}</h5>
-                            <p class="mb-2"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p>
-                            <ul class="list-group mt-2">`;
-                    
+                    resultsHtml += `<div class="card bg-dark text-white p-3 mb-3 border border-secondary"><h5 class="text-warning">March ${res.marchIndex}</h5><p class="mb-2"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p><ul class="list-group mt-2">`;
                     res.joiners.forEach(j => {
-                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center">
-                            <span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span>
-                            <span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span>
-                        </li>`;
+                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center"><span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span><span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span></li>`;
                     });
-
                     resultsHtml += `</ul></div>`;
                 });
-
                 resultsHtml += `</div>`;
                 document.getElementById('resultsArea').innerHTML = resultsHtml;
-
             } catch (err) {
                 alert('Error running matcher: ' + err.message);
             } finally {
