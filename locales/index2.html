@@ -306,55 +306,67 @@
                 statusEl.className = "text-xs mt-1.5 text-amber-400 h-4";
                 return;
             }
-
+        
             statusEl.textContent = "Checking ID...";
             statusEl.className = "text-xs mt-1.5 text-cyan-400 h-4";
-
+        
             try {
-                // Fetch player info from your game API / player lookup table
-                const { data, error } = await supabaseClient
-                    .from('registrations')
+                // 1. Fetch main submission data
+                const { data: subData, error: subError } = await supabaseClient
+                    .from('svs_player_submissions')
                     .select('*')
                     .eq('player_id', playerId)
                     .maybeSingle();
-
-                if (error) throw error;
-
-                if (data) {
-                    document.getElementById('playerName').value = data.player_name || '';
-                    document.getElementById('allianceName').value = data.alliance_tag || '';
-                    document.getElementById('usualName').value = data.usual_name || '';
-                    document.getElementById('labyrinthScore').value = data.labyrinth_score || '';
-                    document.getElementById('infantryLevel').value = data.infantry_level || '';
-                    document.getElementById('lancerLevel').value = data.lancer_level || '';
-                    document.getElementById('marksmanLevel').value = data.marksman_level || '';
-
-                    // Restore participation type
-                    if (data.participation_type) {
-                        const radio = document.querySelector(`input[name="participationType"][value="${data.participation_type}"]`);
-                        if (radio) {
-                            radio.checked = true;
-                            radio.dispatchEvent(new Event('change'));
+        
+                if (subError) throw subError;
+        
+                if (subData) {
+                    document.getElementById('playerName').value = subData.player_name || '';
+                    document.getElementById('usualName').value = subData.usual_name || '';
+                    document.getElementById('labyrinthScore').value = subData.labyrinth_score || '';
+                    document.getElementById('infantryLevel').value = subData.infantry_level || '';
+                    document.getElementById('lancerLevel').value = subData.lancer_level || '';
+                    document.getElementById('marksmanLevel').value = subData.marksman_level || '';
+        
+                    // 2. Fetch availability data
+                    const { data: availData } = await supabaseClient
+                        .from('svs_availability')
+                        .select('*')
+                        .eq('player_id', playerId)
+                        .order('battle_date', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
+        
+                    if (availData) {
+                        if (availData.participation_type) {
+                            const radio = document.querySelector(`input[name="participationType"][value="${availData.participation_type}"]`);
+                            if (radio) {
+                                radio.checked = true;
+                                radio.dispatchEvent(new Event('change'));
+                            }
+                        }
+                        if (Array.isArray(availData.time_slots)) {
+                            document.querySelectorAll('.time-slot-checkbox').forEach(cb => {
+                                cb.checked = availData.time_slots.includes(cb.value);
+                            });
                         }
                     }
-
-                    // Restore time slots
-                    if (Array.isArray(data.time_slots)) {
-                        document.querySelectorAll('.time-slot-checkbox').forEach(cb => {
-                            cb.checked = data.time_slots.includes(cb.value);
+        
+                    // 3. Fetch hero statuses
+                    const { data: heroData } = await supabaseClient
+                        .from('player_heroes')
+                        .select('*')
+                        .eq('player_id', playerId);
+        
+                    if (heroData) {
+                        heroData.forEach(h => {
+                            const starsCb = document.getElementById(`hero_${h.hero_name}_stars`);
+                            const skillCb = document.getElementById(`hero_${h.hero_name}_skill`);
+                            if (starsCb) starsCb.checked = !!h.stars;
+                            if (skillCb) skillCb.checked = !!h.skill_level;
                         });
                     }
-
-                    // Restore heroes
-                    if (data.heroes) {
-                        Object.entries(data.heroes).forEach(([hKey, hVal]) => {
-                            const starsCb = document.getElementById(`hero_${hKey}_stars`);
-                            const skillCb = document.getElementById(`hero_${hKey}_skill`);
-                            if (starsCb) starsCb.checked = !!hVal.stars;
-                            if (skillCb) skillCb.checked = !!hVal.skill;
-                        });
-                    }
-
+        
                     statusEl.textContent = "Data loaded successfully!";
                     statusEl.className = "text-xs mt-1.5 text-emerald-400 h-4";
                 } else {
