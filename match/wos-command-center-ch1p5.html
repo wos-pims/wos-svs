@@ -291,9 +291,10 @@
                 marchesForSlot.forEach(m => {
                     let joinersList = m.joiners.map(j => {
                         const isSlotConfirmed = j.participationType === 'slots';
+                        // Fixed: Changed text-muted to text-light text-opacity-75 for better readability
                         const playerStyle = isSlotConfirmed 
                             ? 'text-white fw-semibold' 
-                            : 'text-muted fst-italic';
+                            : 'text-light text-opacity-75 fst-italic';
                         
                         const cleanHero = j.requiredHero && j.requiredHero !== 'Any' 
                             ? j.requiredHero.replace('_skill', '').replace(/_/g, ' ') 
