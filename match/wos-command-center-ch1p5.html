@@ -15,17 +15,17 @@
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
         
         /* Time Gradient Badge Styles */
-        .badge-slot-purple { background-color: #581c87; color: #e9d5ff; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
-        .badge-slot-blue { background-color: #1e3a8a; color: #bfdbfe; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
-        .badge-slot-green { background-color: #065f46; color: #a7f3d0; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
-        .badge-slot-yellow { background-color: #854d0e; color: #fef08a; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
-        .badge-slot-orange { background-color: #9a3412; color: #ffedd5; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
-        .badge-slot-default { background-color: #374151; color: #d1d5db; font-size: 0.7rem; padding: 0.2em 0.4em; border-radius: 4px; font-weight: 600; }
+        .badge-slot-purple { background-color: #581c87 !important; color: #e9d5ff !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-blue { background-color: #1e3a8a !important; color: #bfdbfe !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-green { background-color: #065f46 !important; color: #a7f3d0 !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-yellow { background-color: #854d0e !important; color: #fef08a !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-orange { background-color: #9a3412 !important; color: #ffedd5 !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-default { background-color: #374151 !important; color: #d1d5db !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
 
         /* Compact Single-Line Timeline Layout */
         .timeline-row-container { display: flex; gap: 0.4rem; width: 100%; }
-        .timeline-block { background-color: #1f2937; border: 1px solid #374151; border-radius: 8px; flex: 1; min-width: 0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
-        .timeline-block-header { padding: 0.35rem 0.4rem; font-size: 0.75rem; font-weight: bold; border-top-left-radius: 7px; border-top-right-radius: 7px; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
+        .timeline-block { background-color: #1f2937; border: 1px solid #374151; border-radius: 8px; flex: 1; min-width: 0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.2); overflow: hidden; }
+        .timeline-block-header { padding: 0.4rem 0.5rem; font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
         .timeline-block-body { padding: 0.4rem; font-size: 0.7rem; color: #d1d5db; max-height: 180px; overflow-y: auto; line-height: 1.25; }
     </style>
 </head>
@@ -111,14 +111,14 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // Helper function for time slot badge classes (Gradient specification)
+        // Robust time slot badge matching supporting '12:00', '12/13', etc.
         function getSlotBadgeClass(slot) {
             const s = (slot || '').toLowerCase();
-            if (s.includes('12/13')) return 'badge-slot-purple';
-            if (s.includes('13/14')) return 'badge-slot-blue';
-            if (s.includes('14/15')) return 'badge-slot-green';
-            if (s.includes('15/16')) return 'badge-slot-yellow';
-            if (s.includes('16/17')) return 'badge-slot-orange';
+            if (s.startsWith('12')) return 'badge-slot-purple';
+            if (s.startsWith('13')) return 'badge-slot-blue';
+            if (s.startsWith('14')) return 'badge-slot-green';
+            if (s.startsWith('15')) return 'badge-slot-yellow';
+            if (s.startsWith('16')) return 'badge-slot-orange';
             return 'badge-slot-default';
         }
 
@@ -164,8 +164,7 @@
 
                 let slotPlayers = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
                 
-                // Expected sort order for timeline blocks
-                const targetOrder = ['12/13', '13/14', '14/15', '15/16', '16/17'];
+                const targetOrder = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
                 (availRes.data || []).forEach(row => {
                     const pType = (row.participation_type || '').toLowerCase();
@@ -200,9 +199,9 @@
                         const playersListHtml = slotPlayers[slot].map(p => `<div class="text-truncate">• ${p}</div>`).join('');
                         timelineContainer.innerHTML += `
                             <div class="timeline-block">
-                                <div class="timeline-block-header" style="background-color: transparent;">
+                                <div class="timeline-block-header ${badgeClass}">
                                     <span class="text-truncate">${slot}</span>
-                                    <span class="${badgeClass}">${slotPlayers[slot].length}</span>
+                                    <span class="badge bg-dark bg-opacity-75">${slotPlayers[slot].length}</span>
                                 </div>
                                 <div class="timeline-block-body">
                                     ${playersListHtml}
@@ -275,7 +274,6 @@
                 let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3 fs-5">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
                 
                 data.results.forEach(res => {
-                    // Render Leader Badges (Time slots or participation status)
                     let leaderBadgesHtml = '';
                     if (res.rallyLeaderTimeSlots && res.rallyLeaderTimeSlots.length > 0) {
                         leaderBadgesHtml = res.rallyLeaderTimeSlots.map(slot => `<span class="${getSlotBadgeClass(slot)}">${slot}</span>`).join(' ');
