@@ -11,56 +11,55 @@
         .form-control, .form-select { background-color: #1f2937; border: 1px solid #374151; color: #f3f4f6; }
         .form-control:focus, .form-select:focus { background-color: #1f2937; border-color: #0ea5e9; color: #f3f4f6; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
         .btn-primary-custom { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; color: white; font-weight: 600; }
-        .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
+        .badge-slot { background-color: #1e3a8a; color: #bfdbfe; font-size: 0.7rem; padding: 0.2em 0.4em; }
         .badge-unsure { background-color: #78350f; color: #fde68a; }
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
         
-        /* Timeline Block Layout */
-        .timeline-scroll-container {
+        /* Compact Single-Line Timeline Layout */
+        .timeline-row-container {
             display: flex;
-            gap: 1rem;
-            overflow-x: auto;
-            padding-bottom: 0.75rem;
-            scrollbar-width: thin;
-            scrollbar-color: #374151 #111827;
+            gap: 0.4rem;
+            width: 100%;
         }
         .timeline-block {
             background-color: #1f2937;
             border: 1px solid #374151;
-            border-radius: 10px;
-            min-width: 240px;
-            max-width: 260px;
-            flex: 0 0 auto;
+            border-radius: 8px;
+            flex: 1;
+            min-width: 0;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         .timeline-block-header {
             background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
             color: #bfdbfe;
-            padding: 0.75rem 1rem;
+            padding: 0.35rem 0.4rem;
+            font-size: 0.75rem;
             font-weight: bold;
-            border-top-left-radius: 9px;
-            border-top-right-radius: 9px;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            white-space: nowrap;
         }
         .timeline-block-body {
-            padding: 1rem;
-            font-size: 0.875rem;
+            padding: 0.4rem;
+            font-size: 0.7rem;
             color: #d1d5db;
-            max-height: 220px;
+            max-height: 180px;
             overflow-y: auto;
+            line-height: 1.25;
         }
     </style>
 </head>
 <body>
 
-    <div class="container py-5" style="max-width: 1000px;">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="container py-4" style="max-width: 1000px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
+                <h2 class="fw-bold text-light mb-0 fs-4">🛡 Alliance Rally Matchmaker</h2>
                 <span class="fs-6 text-info">Admin Panel</span>
             </div>
             <div class="d-flex align-items-center gap-3">
@@ -69,26 +68,26 @@
             </div>
         </div>
 
-        <div class="card card-custom p-4 mb-4">
-            <h4 class="text-info mb-3">Player Availability Overview</h4>
+        <div class="card card-custom p-3 mb-4">
+            <h5 class="text-info mb-3">Player Availability Overview</h5>
 
-            <!-- Timeline Blocks Section (Full Width Flow) -->
-            <div class="mb-4">
-                <h6 class="text-secondary mb-2">Available Time Slots (Timeline)</h6>
-                <div id="timeslotTimelineContainer" class="timeline-scroll-container">
+            <!-- Compact Single-Line Timeline Section -->
+            <div class="mb-3">
+                <h6 class="text-secondary mb-2 small fw-bold">Available Time Slots</h6>
+                <div id="timeslotTimelineContainer" class="timeline-row-container">
                     <div class="text-muted small p-2">Loading timeline...</div>
                 </div>
             </div>
 
-            <div class="row g-3 mb-4">
+            <div class="row g-2 mb-3">
                 <div class="col-md-6">
-                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
-                        <h6 class="text-secondary mb-2">Unsure Players</h6>
-                        <div class="d-flex justify-content-between mb-2 small">
+                    <div class="p-2 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-secondary mb-1 small">Unsure Players</h6>
+                        <div class="d-flex justify-content-between mb-1 small" style="font-size: 0.8rem;">
                             <span>Flexible / Unscheduled:</span>
                             <span id="countUnscheduled" class="badge badge-unsure">0</span>
                         </div>
-                        <div class="d-flex justify-content-between small">
+                        <div class="d-flex justify-content-between small" style="font-size: 0.8rem;">
                             <span>On and Off:</span>
                             <span id="countOnAndOff" class="badge badge-unsure">0</span>
                         </div>
@@ -96,23 +95,23 @@
                 </div>
 
                 <div class="col-md-6">
-                    <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
-                        <h6 class="text-secondary mb-2">Unavailable Players</h6>
-                        <div class="d-flex justify-content-between align-items-center small">
+                    <div class="p-2 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-secondary mb-1 small">Unavailable Players</h6>
+                        <div class="d-flex justify-content-between align-items-center small" style="font-size: 0.8rem;">
                             <span>Won't participate (No):</span>
-                            <span id="countNo" class="badge badge-no fs-6">0</span>
+                            <span id="countNo" class="badge badge-no">0</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <hr class="border-secondary my-3">
+            <hr class="border-secondary my-2">
 
-            <div class="mb-3">
-                <label for="marchCount" class="form-label fw-semibold">How many rallies do you want?</label>
-                <input type="number" id="marchCount" class="form-control w-25" value="1" min="1" max="10">
+            <div class="mb-2">
+                <label for="marchCount" class="form-label small fw-semibold">How many rallies do you want?</label>
+                <input type="number" id="marchCount" class="form-control form-control-sm w-25" value="1" min="1" max="10">
             </div>
-            <button class="btn btn-primary-custom btn-lg w-100" id="generateFieldsBtn">Generate March Configuration Rows</button>
+            <button class="btn btn-primary-custom btn-sm w-100 py-2" id="generateFieldsBtn">Generate March Configuration Rows</button>
         </div>
 
         <div id="marchConfigsContainer" class="mb-4"></div>
@@ -212,11 +211,11 @@
                 if (sortedSlots.length > 0) {
                     timelineContainer.innerHTML = '';
                     sortedSlots.forEach(slot => {
-                        const playersListHtml = slotPlayers[slot].map(p => `<div>• ${p}</div>`).join('');
+                        const playersListHtml = slotPlayers[slot].map(p => `<div class="text-truncate">• ${p}</div>`).join('');
                         timelineContainer.innerHTML += `
                             <div class="timeline-block">
                                 <div class="timeline-block-header">
-                                    <span>${slot}</span>
+                                    <span class="text-truncate">${slot}</span>
                                     <span class="badge badge-slot">${slotPlayers[slot].length}</span>
                                 </div>
                                 <div class="timeline-block-body">
@@ -244,21 +243,21 @@
                 availableHeroes.forEach(h => heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`);
 
                 const row = document.createElement('div');
-                row.className = 'card card-custom p-4 mb-3 march-row';
+                row.className = 'card card-custom p-3 mb-3 march-row';
                 row.dataset.marchIndex = i;
                 row.innerHTML = `
-                    <h5 class="text-warning mb-3">March ${i} Configuration</h5>
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control inf-ratio" value="60"></div>
-                        <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control lancer-ratio" value="40"></div>
-                        <div class="col-md-4"><label class="form-label small text-secondary">Marksman Ratio (%)</label><input type="number" class="form-control marksman-ratio" value="0"></div>
+                    <h5 class="text-warning mb-3 fs-6">March ${i} Configuration</h5>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control form-control-sm inf-ratio" value="60"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control form-control-sm lancer-ratio" value="40"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Marksman Ratio (%)</label><input type="number" class="form-control form-control-sm marksman-ratio" value="0"></div>
                     </div>
-                    <h6 class="text-light mt-3 mb-2">4 Joiner Hero Requirements</h6>
-                    <div class="row g-3">
-                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 1</label><select class="form-select joiner-hero">${heroOptions}</select></div>
-                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 2</label><select class="form-select joiner-hero">${heroOptions}</select></div>
-                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 3</label><select class="form-select joiner-hero">${heroOptions}</select></div>
-                        <div class="col-md-3"><label class="form-label small text-muted">Joiner 4</label><select class="form-select joiner-hero">${heroOptions}</select></div>
+                    <h6 class="text-light mt-2 mb-2 small">4 Joiner Hero Requirements</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 1</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 2</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 3</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 4</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
                     </div>`;
                 container.appendChild(row);
             }
@@ -287,11 +286,11 @@
                 if (error) throw error;
                 if (!data.success) throw new Error(data.error);
 
-                let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
+                let resultsHtml = `<div class="card card-custom p-4"><h3 class="text-success mb-3 fs-5">Rally Match Results</h3><p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
                 data.results.forEach(res => {
-                    resultsHtml += `<div class="card bg-dark text-white p-3 mb-3 border border-secondary"><h5 class="text-warning">March ${res.marchIndex}</h5><p class="mb-2"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p><ul class="list-group mt-2">`;
+                    resultsHtml += `<div class="card bg-dark text-white p-3 mb-3 border border-secondary"><h5 class="text-warning fs-6">March ${res.marchIndex}</h5><p class="mb-2 small"><strong>👑 Rally Leader:</strong> ${res.rallyLeader}</p><ul class="list-group mt-2">`;
                     res.joiners.forEach(j => {
-                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center"><span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span><span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span></li>`;
+                        resultsHtml += `<li class="list-group-item bg-dark text-white border-secondary d-flex justify-content-between align-items-center small py-2"><span>Joiner Slot ${j.slot}: <strong>${j.playerName}</strong></span><span class="badge bg-info text-dark">Hero: ${j.requiredHero}</span></li>`;
                     });
                     resultsHtml += `</ul></div>`;
                 });
