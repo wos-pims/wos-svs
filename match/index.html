@@ -32,42 +32,30 @@
         const discordLoginBtn = document.getElementById('discordLoginBtn');
         const authMessage = document.getElementById('authMessage');
 
-        async function verifyAndRedirect() {
+        async function verifySession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
 
-            // Check if user exists in the admin_users table
-            const { data: adminRecord, error } = await supabase
-                .from('admin_users')
-                .select('*')
-                .eq('email', session.user.email)
-                .maybeSingle();
+            authMessage.innerHTML = `<span class="text-info">Verifying authorization...</span>`;
+            const { data, error } = await supabase.functions.invoke('verify-admin');
 
-            if (adminRecord && !error) {
-                // Authorized: Forward to admin panel
+            if (!error && data?.authorized) {
                 window.location.href = 'admin.html';
             } else {
-                // Denied: Log attempt and sign out
-                await supabase.from('admin_login_logs').insert({
-                    user_id: session.user.id,
-                    email: session.user.email,
-                    discord_username: session.user.user_metadata?.full_name || 'Unknown',
-                    status: 'denied'
-                });
                 await supabase.auth.signOut();
-                authMessage.innerHTML = `<span class="text-danger">Access Denied. You're not a real chips lover 🍟</span>`;
+                const deniedEmail = data?.email || 'Unknown';
+                authMessage.innerHTML = `<span class="text-danger">Access Denied: Not a real chips lover 🍟</span>`;
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
 
-        verifyAndRedirect();
+        verifySession();
 
         discordLoginBtn.addEventListener('click', async () => {
-            const { error } = await supabase.auth.signInWithOAuth({
+            await supabase.auth.signInWithOAuth({
                 provider: 'discord',
                 options: { redirectTo: window.location.origin + window.location.pathname }
             });
-            if (error) alert('Login error: ' + error.message);
         });
     </script>
 </body>
