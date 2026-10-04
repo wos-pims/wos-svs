@@ -34,16 +34,16 @@
         async function verifySession() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
-
+        
             authMessage.innerHTML = `<span class="text-info">Verifying authorization...</span>`;
-
-            const { data, error } = await supabase.functions.invoke('login');
-            if (!error && data?.authorized) {
-                window.location.href = 'admin.html';
+        
+            const { data, error } = await supabase.functions.invoke('verify-admin');
+        
+            if (!error && data?.authorized && data?.redirectUrl) {
+                window.location.href = data.redirectUrl;
             } else {
                 await supabase.auth.signOut();
-                const deniedEmail = data?.email || 'Unknown';
-                authMessage.innerHTML = `<span class="text-danger">Access Denied: You're not a real chips lover 🍟</span>`;
+                authMessage.innerHTML = `<span class="text-danger">You're not a real chips 🍟 lover. I can tell.</span>`;
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
