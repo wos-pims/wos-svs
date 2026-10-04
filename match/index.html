@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    <!-- MAIN ADMIN PANEL (Hidden until authenticated) -->
+    <!-- MAIN ADMIN PANEL -->
     <div id="adminContainer" class="container py-5" style="max-width: 900px; display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -161,25 +161,38 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // 1. Check Auth State on Page Load
-        async function checkUserSession() {
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (session) {
-                authContainer.style.display = 'none';
-                adminContainer.style.display = 'block';
-                initAdminPanel();
-            } else {
-                authContainer.style.display = 'flex';
-                adminContainer.style.display = 'none';
+        // Function to log the login attempt into admin_login_logs table
+        async function logUserLogin(user) {
+            try {
+                // Prevent duplicate logging within the same session persistence window
+                const sessionKey = `logged_${user.id}`;
+                if (sessionStorage.getItem(sessionKey)) return;
+
+                const metadata = user.user_metadata || {};
+                const discordName = metadata.full_name || metadata.name || metadata.preferred_username || 'Unknown Discord User';
+
+                await supabase.from('admin_login_logs').insert({
+                    user_id: user.id,
+                    email: user.email || null,
+                    discord_username: discordName
+                });
+
+                sessionStorage.setItem(sessionKey, 'true');
+            } catch (err) {
+                console.error('Failed to write login log:', err.message);
             }
         }
 
-        // Listen for auth changes
-        supabase.auth.onAuthStateChange((event, session) => {
+        // Auth State Handler
+        supabase.auth.onAuthStateChange(async (event, session) => {
             if (session) {
                 authContainer.style.display = 'none';
                 adminContainer.style.display = 'block';
+                
+                if (event === 'SIGNED_IN') {
+                    await logUserLogin(session.user);
+                }
+                
                 initAdminPanel();
             } else {
                 authContainer.style.display = 'flex';
@@ -192,7 +205,7 @@
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'discord',
                 options: {
-                    redirectTo: window.location.href
+                    redirectTo: window.location.origin + window.location.pathname
                 }
             });
             if (error) alert('Login error: ' + error.message);
@@ -200,12 +213,23 @@
 
         // Logout
         logoutBtn.addEventListener('click', async () => {
+            sessionStorage.clear();
             await supabase.auth.signOut();
         });
 
-        checkUserSession();
+        // Initial check on page load
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                authContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                logUserLogin(session.user);
+                initAdminPanel();
+            } else {
+                authContainer.style.display = 'flex';
+                adminContainer.style.display = 'none';
+            }
+        });
 
-        // 2. Initialize Admin Data & Stats
         async function initAdminPanel() {
             try {
                 const { data: settingData, error: settingError } = await supabase
