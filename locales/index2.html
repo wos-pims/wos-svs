@@ -259,48 +259,33 @@
             });
         }
 
-        function applyTranslations() {
-            document.getElementById('pageTitle').textContent = getTranslation('title');
-            document.getElementById('headerTitle').textContent = getTranslation('title');
-            document.getElementById('instructionsPlayerText').textContent = getTranslation('instructionsPlayer');
-            document.getElementById('instructionsSvsText').textContent = getTranslation('instructionsSvs');
-            document.getElementById('lblPlayerId').textContent = getTranslation('playerIdLabel');
-            document.getElementById('playerId').placeholder = getTranslation('playerIdPlaceholder');
-            document.getElementById('lookupBtn').textContent = getTranslation('lookupBtn');
-            document.getElementById('lblPlayerName').textContent = getTranslation('playerNameLabel');
-            document.getElementById('playerName').placeholder = getTranslation('playerNamePlaceholder');
-            document.getElementById('lblAlliance').textContent = getTranslation('allianceLabel');
-            document.getElementById('allianceName').placeholder = getTranslation('alliancePlaceholder');
-            document.getElementById('lblUsualName').textContent = getTranslation('usualNameLabel');
-            document.getElementById('usualName').placeholder = getTranslation('usualNamePlaceholder');
-            document.getElementById('lblLabyrinthScore').textContent = getTranslation('labyrinthScoreLabel');
-            document.getElementById('labyrinthScore').placeholder = getTranslation('labyrinthScorePlaceholder');
-            document.getElementById('lblInfantry').textContent = getTranslation('infantryLabel');
-            document.getElementById('lblLancer').textContent = getTranslation('lancerLabel');
-            document.getElementById('lblMarksman').textContent = getTranslation('marksmanLabel');
-            document.getElementById('lblHeroesTitle').textContent = getTranslation('heroesTitle');
-            document.getElementById('lblHeroStarsCol').textContent = getTranslation('heroStarsCol');
-            document.getElementById('lblHeroSkillCol').textContent = getTranslation('heroSkillCol');
-            document.getElementById('lblAvailTitle').textContent = getTranslation('availTitle');
-            document.getElementById('lblTypeSlots').textContent = getTranslation('typeSlots');
-            document.getElementById('lblTypeUnscheduled').textContent = getTranslation('typeUnscheduled');
-            document.getElementById('lblTypeOnOff').textContent = getTranslation('typeOnOff');
-            document.getElementById('lblTypeNone').textContent = getTranslation('typeNone');
-            document.getElementById('lblSelectSlots').textContent = getTranslation('selectSlots');
-            document.getElementById('submitBtn').textContent = getTranslation('submitBtn');
-            document.getElementById('footerText').textContent = getTranslation('footer');
-
-            populateSelects();
-            renderHeroes();
+        let translations = {};
+        async function loadTranslations(lang) {
+            try {
+                const response = await fetch(`./locales/${lang}.json`);
+                if (!response.ok) throw new Error(`Could not load ${lang}.json`);
+                translations = await response.json();
+                applyTranslations();
+            } catch (err) {
+                console.error("Failed to load translation file:", err);
+                if (lang !== 'en') loadTranslations('en');
+            }
         }
 
         document.getElementById('langSwitch').addEventListener('change', (e) => {
             currentLang = e.target.value;
-            document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
-            applyTranslations();
+            if (currentLang === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+            }
+            loadTranslations(currentLang);
             const existingId = document.getElementById('playerId').value.trim();
             if (existingId) fetchPlayerData();
         });
+    
+        // Call on initial startup instead of applying inline dictionaries directly
+        loadTranslations('en');
 
         document.querySelectorAll('input[name="participationType"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
