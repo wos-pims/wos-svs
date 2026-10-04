@@ -14,11 +14,12 @@
         .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
         .badge-unsure { background-color: #78350f; color: #fde68a; }
         .badge-no { background-color: #7f1d1d; color: #fecaca; }
+        .timeline-slot { border-left: 3px solid #0ea5e9; padding-left: 10px; margin-bottom: 12px; }
     </style>
 </head>
 <body>
 
-    <div class="container py-5" style="max-width: 900px;">
+    <div class="container py-5" style="max-width: 1000px;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-light mb-0">🛡 Alliance Rally Matchmaker</h2>
@@ -34,36 +35,42 @@
             <h4 class="text-info mb-3">Player Availability Overview</h4>
             
             <div class="row g-3 mb-4">
-                <div class="col-md-4">
+                <!-- Timeline Column -->
+                <div class="col-md-6">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
-                        <h6 class="text-secondary mb-2">Available Time Slots</h6>
-                        <ul id="timeslotStatsList" class="list-unstyled small mb-0">
-                            <li class="text-muted">Loading counts...</li>
-                        </ul>
+                        <h6 class="text-secondary mb-3">⏰ Time Slots Timeline</h6>
+                        <div id="timeslotStatsList" class="small mb-0" style="max-height: 400px; overflow-y: auto;">
+                            <div class="text-muted">Loading timeline...</div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <!-- Unsure Players Column -->
+                <div class="col-md-3">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Unsure Players</h6>
                         <div class="d-flex justify-content-between mb-1 small">
                             <span>Flexible / Unscheduled:</span>
                             <span id="countUnscheduled" class="badge badge-unsure">0</span>
                         </div>
-                        <div class="d-flex justify-content-between small">
+                        <div id="unscheduledPlayersList" class="small mb-3 text-muted"></div>
+                        <div class="d-flex justify-content-between mb-1 small">
                             <span>On and Off:</span>
                             <span id="countOnAndOff" class="badge badge-unsure">0</span>
                         </div>
+                        <div id="onAndOffPlayersList" class="small text-muted"></div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <!-- Unavailable Players Column -->
+                <div class="col-md-3">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
-                        <h6 class="text-secondary mb-2">Unavailable Players</h6>
-                        <div class="d-flex justify-content-between align-items-center small">
-                            <span>Won't participate (No):</span>
+                        <h6 class="text-secondary mb-2">Unavailable</h6>
+                        <div class="d-flex justify-content-between align-items-center small mb-2">
+                            <span>Won't participate:</span>
                             <span id="countNo" class="badge badge-no fs-6">0</span>
                         </div>
+                        <div id="noPlayersList" class="small text-muted"></div>
                     </div>
                 </div>
             </div>
@@ -106,7 +113,7 @@
                 return;
             }
 
-            const { data, error } = await supabase.functions.invoke('login');
+            const { data, error } = await supabase.functions.invoke('verify-admin');
             if (error || !data?.authorized) {
                 await supabase.auth.signOut();
                 window.location.href = 'index.html';
@@ -134,32 +141,68 @@
                 const { data: availData } = await supabase
                     .from('svs_availability').select('*').eq('battle_date', currentBattleDate);
 
-                let slotCounts = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
+                let slotPlayers = {};
+                let unscheduledPlayers = [];
+                let onAndOffPlayers = [];
+                let noPlayers = [];
+
                 (availData || []).forEach(row => {
                     const pType = (row.participation_type || '').toLowerCase();
-                    if (pType === 'no') noCount++;
-                    else if (pType === 'unscheduled') unscheduledCount++;
-                    else if (pType === 'on_and_off') onAndOffCount++;
-                    else {
+                    const playerName = row.player_name || row.character_name || row.name || row.discord_username || 'Unknown';
+
+                    if (pType === 'no') {
+                        noPlayers.push(playerName);
+                    } else if (pType === 'unscheduled') {
+                        unscheduledPlayers.push(playerName);
+                    } else if (pType === 'on_and_off') {
+                        onAndOffPlayers.push(playerName);
+                    } else {
                         let slots = row.time_slots;
                         if (typeof slots === 'string') { try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; } }
-                        if (Array.isArray(slots)) { slots.forEach(s => slotCounts[s] = (slotCounts[s] || 0) + 1); }
+                        if (Array.isArray(slots)) {
+                            slots.forEach(s => {
+                                if (!slotPlayers[s]) slotPlayers[s] = [];
+                                slotPlayers[s].push(playerName);
+                            });
+                        }
                     }
                 });
 
+                // Render Timeline
                 const slotListEl = document.getElementById('timeslotStatsList');
-                if (Object.keys(slotCounts).length > 0) {
+                const sortedSlots = Object.keys(slotPlayers).sort();
+                if (sortedSlots.length > 0) {
                     slotListEl.innerHTML = '';
-                    for (const [slot, count] of Object.entries(slotCounts)) {
-                        slotListEl.innerHTML += `<li class="d-flex justify-content-between mb-1"><span>${slot}:</span> <span class="badge badge-slot">${count} players</span></li>`;
-                    }
+                    sortedSlots.forEach(slot => {
+                        const players = slotPlayers[slot];
+                        slotListEl.innerHTML += `
+                            <div class="timeline-slot">
+                                <div class="fw-bold text-info mb-1">${slot} <span class="badge bg-secondary ms-1">${players.length} players</span></div>
+                                <div class="d-flex flex-wrap gap-1">
+                                    ${players.map(p => `<span class="badge badge-slot">${p}</span>`).join('')}
+                                </div>
+                            </div>`;
+                    });
                 } else {
-                    slotListEl.innerHTML = `<li class="text-muted">No specific time slots recorded.</li>`;
+                    slotListEl.innerHTML = `<div class="text-muted">No specific time slots recorded.</div>`;
                 }
 
-                document.getElementById('countUnscheduled').textContent = unscheduledCount;
-                document.getElementById('countOnAndOff').textContent = onAndOffCount;
-                document.getElementById('countNo').textContent = noCount;
+                // Render Unscheduled / On-and-Off / No Player Badges
+                document.getElementById('countUnscheduled').textContent = unscheduledPlayers.length;
+                document.getElementById('unscheduledPlayersList').innerHTML = unscheduledPlayers.length > 0 
+                    ? unscheduledPlayers.map(p => `<span class="badge badge-unsure me-1 mb-1">${p}</span>`).join('') 
+                    : '<span class="text-muted">None</span>';
+
+                document.getElementById('countOnAndOff').textContent = onAndOffPlayers.length;
+                document.getElementById('onAndOffPlayersList').innerHTML = onAndOffPlayers.length > 0 
+                    ? onAndOffPlayers.map(p => `<span class="badge badge-unsure me-1 mb-1">${p}</span>`).join('') 
+                    : '<span class="text-muted">None</span>';
+
+                document.getElementById('countNo').textContent = noPlayers.length;
+                document.getElementById('noPlayersList').innerHTML = noPlayers.length > 0 
+                    ? noPlayers.map(p => `<span class="badge badge-no me-1 mb-1">${p}</span>`).join('') 
+                    : '<span class="text-muted">None</span>';
+
             } catch (err) {
                 battleDateBadge.textContent = 'Error loading date';
             }
