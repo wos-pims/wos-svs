@@ -20,7 +20,7 @@
         }
         .form-control, .form-select {
             background-color: #1f2937;
-            border: 1px.solid #374151;
+            border: 1px solid #374151;
             color: #f3f4f6;
         }
         .form-control:focus, .form-select:focus {
@@ -39,25 +39,45 @@
             background: linear-gradient(135deg, #0284c7, #0369a1);
             color: white;
         }
-        .badge-slot {
-            background-color: #1e3a8a;
-            color: #bfdbfe;
+        .btn-discord {
+            background-color: #5865F2;
+            border: none;
+            color: white;
+            font-weight: 600;
         }
-        .badge-unsure {
-            background-color: #78350f;
-            color: #fde68a;
+        .btn-discord:hover {
+            background-color: #4752C4;
+            color: white;
         }
-        .badge-no {
-            background-color: #7f1d1d;
-            color: #fecaca;
-        }
+        .badge-slot { background-color: #1e3a8a; color: #bfdbfe; }
+        .badge-unsure { background-color: #78350f; color: #fde68a; }
+        .badge-no { background-color: #7f1d1d; color: #fecaca; }
     </style>
 </head>
 <body>
-    <div class="container py-5" style="max-width: 900px;">
+
+    <!-- AUTHENTICATION GATE CONTAINER -->
+    <div id="authContainer" class="container d-flex justify-content-center align-items-center vh-100" style="display: none !important;">
+        <div class="card card-custom p-5 text-center" style="max-width: 400px; width: 100%;">
+            <h3 class="fw-bold mb-3">🔒 Restricted Access</h3>
+            <p class="text-muted small mb-4">You must authenticate with Discord to access the alliance matchmaker admin controls.</p>
+            <button id="discordLoginBtn" class="btn btn-discord btn-lg py-2 w-100 shadow">
+                Login with Discord
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN ADMIN PANEL (Hidden until authenticated) -->
+    <div id="adminContainer" class="container py-5" style="max-width: 900px; display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold text-light">🛡️ Alliance Rally Matchmaker <span class="fs-6 text-info">Admin Panel</span></h2>
-            <div id="battleDateDisplay" class="badge bg-secondary px-3 py-2 fs-6">Loading Battle Date...</div>
+            <div>
+                <h2 class="fw-bold text-light mb-0">🛡️ Alliance Rally Matchmaker</h2>
+                <span class="fs-6 text-info">Admin Panel</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div id="battleDateDisplay" class="badge bg-secondary px-3 py-2 fs-6">Loading Battle Date...</div>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+            </div>
         </div>
 
         <!-- Global Settings & Live Statistics Card -->
@@ -65,7 +85,6 @@
             <h4 class="text-info mb-3">Player Availability Overview</h4>
             
             <div class="row g-3 mb-4">
-                <!-- Available for timeslots -->
                 <div class="col-md-4">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Available Time Slots</h6>
@@ -75,7 +94,6 @@
                     </div>
                 </div>
 
-                <!-- Unsure Players -->
                 <div class="col-md-4">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Unsure Players</h6>
@@ -90,7 +108,6 @@
                     </div>
                 </div>
 
-                <!-- Unavailable Players -->
                 <div class="col-md-4">
                     <div class="p-3 rounded-3 bg-dark border border-secondary h-100">
                         <h6 class="text-secondary mb-2">Unavailable Players</h6>
@@ -130,6 +147,11 @@
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        const authContainer = document.getElementById('authContainer');
+        const adminContainer = document.getElementById('adminContainer');
+        const discordLoginBtn = document.getElementById('discordLoginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
         const generateBtn = document.getElementById('generateFieldsBtn');
         const marchCountInput = document.getElementById('marchCount');
         const container = document.getElementById('marchConfigsContainer');
@@ -137,13 +159,55 @@
         const battleDateBadge = document.getElementById('battleDateDisplay');
 
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
-
         let currentBattleDate = null;
 
-        // Fetch active battle date and stats on load
+        // 1. Check Auth State on Page Load
+        async function checkUserSession() {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (session) {
+                authContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                initAdminPanel();
+            } else {
+                authContainer.style.display = 'flex';
+                adminContainer.style.display = 'none';
+            }
+        }
+
+        // Listen for auth changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                authContainer.style.display = 'none';
+                adminContainer.style.display = 'block';
+                initAdminPanel();
+            } else {
+                authContainer.style.display = 'flex';
+                adminContainer.style.display = 'none';
+            }
+        });
+
+        // Trigger Discord Login
+        discordLoginBtn.addEventListener('click', async () => {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'discord',
+                options: {
+                    redirectTo: window.location.href
+                }
+            });
+            if (error) alert('Login error: ' + error.message);
+        });
+
+        // Logout
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+
+        checkUserSession();
+
+        // 2. Initialize Admin Data & Stats
         async function initAdminPanel() {
             try {
-                // 1. Get next_svs_date from settings table
                 const { data: settingData, error: settingError } = await supabase
                     .from('settings')
                     .select('value')
@@ -157,7 +221,6 @@
                 currentBattleDate = settingData.value;
                 battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
 
-                // 2. Fetch availability records for this battle date
                 const { data: availData, error: availError } = await supabase
                     .from('svs_availability')
                     .select('*')
@@ -165,7 +228,6 @@
 
                 if (availError) throw availError;
 
-                // 3. Compute stats
                 let slotCounts = {};
                 let unscheduledCount = 0;
                 let onAndOffCount = 0;
@@ -179,8 +241,7 @@
                         unscheduledCount++;
                     } else if (pType === 'on_and_off') {
                         onAndOffCount++;
-                    } else if (pType === 'available' || pType === 'yes' || pType.includes('slot')) {
-                        // Parse time slots if stored as array or string
+                    } else {
                         let slots = row.time_slots;
                         if (typeof slots === 'string') {
                             try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; }
@@ -193,7 +254,6 @@
                     }
                 });
 
-                // Render Timeslot Stats
                 const slotListEl = document.getElementById('timeslotStatsList');
                 if (Object.keys(slotCounts).length > 0) {
                     slotListEl.innerHTML = '';
@@ -213,8 +273,6 @@
                 battleDateBadge.textContent = 'Error loading date';
             }
         }
-
-        initAdminPanel();
 
         generateBtn.addEventListener('click', () => {
             const count = parseInt(marchCountInput.value) || 1;
@@ -300,7 +358,6 @@
                     });
                 });
 
-                // Invoke Supabase Edge Function
                 const { data, error } = await supabase.functions.invoke('calculate-matches', {
                     body: { 
                         battleDate: currentBattleDate,
@@ -311,7 +368,6 @@
                 if (error) throw error;
                 if (!data.success) throw new Error(data.error);
 
-                // Render Results
                 let resultsHtml = `<div class="card card-custom p-4">
                     <h3 class="text-success mb-3">Rally Match Results</h3>
                     <p class="text-muted small">Battle Date: ${currentBattleDate}</p>`;
