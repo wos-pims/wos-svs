@@ -15,12 +15,14 @@
         <div class="card bg-secondary text-white p-4 mb-4">
             <h3>Global Settings</h3>
             <div class="mb-3">
-                <label for="battleDate" class="form-label">Battle Date</label>
-                <input type="date" id="battleDate" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="marchCount" class="form-label">Number of Marches</label>
-                <input type="number" id="marchCount" class="form-control" value="3" min="1" max="10">
+                <label for="marchCount" class="form-label">Available players :</label>
+                <!-- here i want a count of how many players are available for each timeslot -->
+                 <label for="marchCount" class="form-label">Unsure players :</label>
+                <!-- here i want a count of how many players have replied "unscheduled" and how many replied "on_and_off" -->
+                <label for="marchCount" class="form-label">Unavailable players :</label>
+                <!-- here i want a count of how many players have replied "none" -->
+                <label for="marchCount" class="form-label">How many rallies do you want? </label>
+                <input type="number" id="marchCount" class="form-control" value="1" min="1" max="10">
             </div>
             <button class="btn btn-primary" id="generateFieldsBtn">Generate March Configuration Rows</button>
         </div>
