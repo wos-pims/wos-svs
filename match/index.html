@@ -37,13 +37,15 @@
         
             authMessage.innerHTML = `<span class="text-info">Verifying authorization...</span>`;
         
-            const { data, error } = await supabase.functions.invoke('verify-admin');
+            const { data, error } = await supabase.functions.invoke('login');
         
             if (!error && data?.authorized && data?.redirectUrl) {
                 window.location.href = data.redirectUrl;
             } else {
                 await supabase.auth.signOut();
-                authMessage.innerHTML = `<span class="text-danger">You're not a real chips 🍟 lover. I can tell.</span>`;
+                const deniedEmail = data?.email || 'Unknown';
+                const errorReason = data?.error || 'Access Denied';
+                authMessage.innerHTML = `<span class="text-danger">${errorReason}</span>`;
                 window.history.replaceState({}, document.title, window.location.pathname);
             }
         }
