@@ -976,15 +976,15 @@
             };
 
             try {
-                const response = await fetch(EDGE_FUNCTION_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                const { data: result, error } = await supabaseClient.functions.invoke('save-registration', {
+                    body: payload
                 });
 
-                const result = await response.json();
+                if (error) {
+                    throw new Error(error.message || 'Failed to invoke Edge Function.');
+                }
 
-                if (!response.ok || !result.success) {
+                if (result && !result.success) {
                     throw new Error(result.error || 'Failed to save registration.');
                 }
 
@@ -992,7 +992,7 @@
                 feedbackEl.className = "text-center text-sm font-medium text-emerald-400 h-6";
             } catch (err) {
                 console.error(err);
-                feedbackEl.textContent = `Error: ${err.message}`;
+                feedbackEl.textContent = `Error: Please ping Pims on Discord or in Game`;
                 feedbackEl.className = "text-center text-sm font-medium text-rose-400 h-6";
             }
 
