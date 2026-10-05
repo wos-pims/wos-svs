@@ -61,7 +61,7 @@
                     <div class="flex gap-2">
                         <input type="number" id="playerId" required 
                             class="flex-grow bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
-                            placeholder="e.g. 295897829">
+                            placeholder="e.g. 123456789">
                         <button type="button" id="lookupBtn" 
                             class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-medium text-sm px-4 py-2.5 rounded-lg transition-colors">
                             Check ID
@@ -70,7 +70,7 @@
                     <div id="lookupStatus" class="text-xs mt-1.5 text-slate-400 h-4"></div>
                 </div>
 
-                <!-- Player Name & Alliance Tag (Auto-fetched & Editable fallback) -->
+                <!-- Player Name & Alliance Tag -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label id="lblPlayerName" class="block text-sm font-medium text-slate-300 mb-1.5">Player Name</label>
@@ -85,14 +85,16 @@
                             placeholder="Auto-filled via Check ID">
                     </div>
                 </div>
+
                 <p id="instructionsSvsText" class="text-sm text-slate-400 mb-6 leading-relaxed">
                     Fill in your troops level, hero statuses, and castle battle availability.
                 </p>
+
                 <!-- Usual Name & Labyrinth Score -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label id="lblUsualName" class="block text-sm font-medium text-slate-300 mb-1.5">Also known as</label>
-                        <input type="text" id="usualName" 
+                        <input type="text" id="usualName" maxlength="50"
                             class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3.5 py-2.5 text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-cyan-500 transition-colors" 
                             placeholder="e.g. MainFarmer">
                     </div>
@@ -168,7 +170,7 @@
                     </div>
                 </div>
 
-                <!-- Heroes Section (5-Star & Skill 5 Checkboxes) -->
+                <!-- Heroes Section -->
                 <div class="border-t border-slate-800 pt-5">
                     <div class="flex justify-between items-center mb-3">
                         <label id="lblHeroesTitle" class="block text-sm font-medium text-slate-300">Heroes Status:</label>
@@ -187,7 +189,6 @@
                         <p class="text-xs text-cyan-400 mt-0.5" id="battleDateDisplay">Next Battle Date: Loading...</p>
                     </div>
 
-                    <!-- Participation Type Radio Options -->
                     <div class="space-y-2.5 mb-4 text-sm text-slate-300">
                         <label class="flex items-center space-x-2.5 rtl:space-x-reverse cursor-pointer">
                             <input type="radio" name="participationType" value="slots" id="typeSlots" class="text-cyan-500 focus:ring-cyan-500 bg-slate-950 border-slate-700">
@@ -207,7 +208,6 @@
                         </label>
                     </div>
 
-                    <!-- Time Slots Checkboxes (12:00 to 17:00 UTC) -->
                     <div id="timeSlotsContainer" class="bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 space-y-2 hidden">
                         <span id="lblSelectSlots" class="block text-xs font-medium text-slate-400 mb-2">Select available 1-hour UTC slots:</span>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-300">
@@ -254,10 +254,11 @@
         <p id="footerText">Powered by chips 🍟</p>
     </footer>
 
-    <!-- Application Script with Embedded Multi-Language Support -->
+    <!-- Main Application Script -->
     <script>
         const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const EDGE_FUNCTION_URL = `${SUPABASE_URL}/functions/v1/save-registration`;
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -268,7 +269,6 @@
 
         const heroKeys = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
 
-        // Localized Hero Names Dictionary
         const heroNamesLocalized = {
             en: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Hector', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
             es: { bradley: 'Bradley', edith: 'Edith', gatot: 'Gatot', hector: 'Héctor', hendricks: 'Hendricks', jasser: 'Jasser', jessie: 'Jessie', magnus: 'Magnus', mia: 'Mia', norah: 'Norah', patrick: 'Patrick', reina: 'Reina', renee: 'Renee', seo_yoon: 'Seo-Yoon' },
@@ -282,7 +282,6 @@
             ja: { bradley: 'ブラッドリー', edith: 'イーディス', gatot: 'ガトット', hector: 'ヘクター', hendricks: 'ヘンドリックス', jasser: 'ジャッサー', jessie: 'ジェシー', magnus: 'マグナス', mia: 'ミア', norah: 'ノラ', patrick: 'パトリック', reina: 'レイナ', renee: 'レネ', seo_yoon: 'ソ・ユン' }
         };
 
-        // UI Translations Dictionary
         const translations = {
             en: {
                 title: "WoS SvS Team Registration - by Pims 🍟",
@@ -499,7 +498,7 @@
                 instructionsPlayer: "Wpisz swój ID Wodza, aby automatycznie wczytać informacje o profilu.",
                 instructionsSvs: "Wypełnij poziom swoich wojsk, status bohaterów oraz dostępność na bitwę o zamek.",
                 playerIdLabel: "ID Gracza",
-                playerIdPlaceholder: "np. 295897829",
+                playerIdPlaceholder: "np. 123456789",
                 lookupBtn: "Sprawdź ID",
                 playerNameLabel: "Nazwa Gracza",
                 playerNamePlaceholder: "Uzupełniane automatycznie",
@@ -534,7 +533,7 @@
                 instructionsPlayer: "Profil bilgilerinizi otomatik yüklemek için Şef ID'nizi girin.",
                 instructionsSvs: "Birlik seviyenizi, kahraman durumunuzu ve kale savaşı uygunluğunuzu doldurun.",
                 playerIdLabel: "Şef ID",
-                playerIdPlaceholder: "örn. 295897829",
+                playerIdPlaceholder: "örn. 123456789",
                 lookupBtn: "ID Kontrol",
                 playerNameLabel: "Oyuncu Adı",
                 playerNamePlaceholder: "Otomatik doldurulur",
@@ -569,7 +568,7 @@
                 instructionsPlayer: "أدخل معرف الشيف الخاص بك لتحميل معلومات ملفك الشخصي تلقائياً.",
                 instructionsSvs: "املأ مستوى قواتك، وحالة الأبطال، ومدى توفرك لمعركة القلعة.",
                 playerIdLabel: "معرف شيف اللاعب (ID)",
-                playerIdPlaceholder: "مثال: 295897829",
+                playerIdPlaceholder: "مثال: 123456789",
                 lookupBtn: "التحقق من المعرف",
                 playerNameLabel: "اسم اللاعب",
                 playerNamePlaceholder: "يتم التعبئة تلقائياً عبر التحقق",
@@ -604,7 +603,7 @@
                 instructionsPlayer: "输入您的首领 ID 以自动加载您的档案信息。",
                 instructionsSvs: "填写您的兵种等级、英雄状态以及城堡战可用时间。",
                 playerIdLabel: "首领 ID",
-                playerIdPlaceholder: "例如 295897829",
+                playerIdPlaceholder: "例如 123456789",
                 lookupBtn: "检查 ID",
                 playerNameLabel: "玩家昵称",
                 playerNamePlaceholder: "通过 ID 自动填充",
@@ -636,7 +635,6 @@
             }
         };
 
-        // Render Hero rows dynamically using localized names in alphabetical order
         function renderHeroes() {
             const container = document.getElementById('heroRows');
             container.innerHTML = '';
@@ -731,7 +729,7 @@
             });
         });
 
-        // Fetch settings and player data
+        // Fetch settings and player data securely
         async function fetchPlayerData() {
             const playerId = document.getElementById('playerId').value.trim();
             const statusEl = document.getElementById('lookupStatus');
@@ -756,7 +754,7 @@
                 currentNextSvsDate = settingData ? settingData.value : 'Unknown Date';
                 document.getElementById('battleDateDisplay').textContent = `Next Battle Date: ${currentNextSvsDate}`;
 
-                // 1. Fetch game profile info via Edge Function / Atlas API
+                // 1. Fetch game profile info via Edge Function
                 const { data: response, error } = await supabaseClient.functions.invoke('fetch-player-api', {
                     body: { player_id: playerId }
                 });
@@ -821,14 +819,9 @@
                     document.getElementById('usualName').value = subData.usual_name || "";
                     document.getElementById('labyrinthScore').value = subData.labyrinth_score !== null ? subData.labyrinth_score : "";
                     
-                    if (subData.alliance_id) {
-                        fetchedAllianceId = subData.alliance_id;
-                    }
-                    if (subData.state_id) {
-                        fetchedStateNum = subData.state_id;
-                    }
+                    if (subData.alliance_id) fetchedAllianceId = subData.alliance_id;
+                    if (subData.state_id) fetchedStateNum = subData.state_id;
 
-                    // Fetch alliance name directly from alliances table using alliance_id
                     let resolvedAllianceName = '';
                     if (subData.alliance_id) {
                         const { data: allianceData } = await supabaseClient
@@ -859,27 +852,22 @@
                 console.error("Error loading submissions:", subErr);
             }
             
-            // 3. Pull all saved hero rows for this player
+            // 3. Pull saved hero rows
             const { data: heroRows, error: heroError } = await supabaseClient
                 .from('player_heroes')
                 .select('*')
                 .eq('player_id', playerId);
             
-            if (heroError) {
-                console.error('Error fetching heroes:', heroError);
-                return;
+            if (!heroError && heroRows) {
+                heroRows.forEach(row => {
+                    const starCheckbox = document.getElementById(`hero_${row.hero_name}_stars`);
+                    const skillCheckbox = document.getElementById(`hero_${row.hero_name}_skill`);
+                    if (starCheckbox) starCheckbox.checked = row.stars;
+                    if (skillCheckbox) skillCheckbox.checked = row.skill_level;
+                });
             }
 
-            // heroRows is an array: [{ player_id, hero_name, stars, skill_level }, ...]
-            heroRows.forEach(row => {
-                const starCheckbox = document.getElementById(`hero_${row.hero_name}_stars`);
-                const skillCheckbox = document.getElementById(`hero_${row.hero_name}_skill`);
-                
-                if (starCheckbox) starCheckbox.checked = row.stars;
-                if (skillCheckbox) skillCheckbox.checked = row.skill_level;
-            });
-
-            // 4. Pull availability ONLY if battle_date matches currentNextSvsDate
+            // 4. Pull availability for current next_svs_date
             try {
                 const { data: availData } = await supabaseClient
                     .from('svs_availability')
@@ -913,7 +901,7 @@
 
         document.getElementById('lookupBtn').addEventListener('click', fetchPlayerData);
 
-        // Form Submission handler
+        // Form Submission via Secure Edge Function (`save-registration`)
         document.getElementById('svsForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submitBtn');
@@ -933,8 +921,10 @@
 
             submitBtn.disabled = true;
             submitBtn.textContent = t.savingBtn;
+            feedbackEl.textContent = "Saving registration...";
+            feedbackEl.className = "text-center text-sm font-medium text-cyan-400 h-6";
 
-            // Resolve alliance ID: if alliance name/tag was manually modified or entered, check against alliances table
+            // Resolve alliance ID if manually entered
             let finalAllianceId = fetchedAllianceId;
             const allianceInputVal = document.getElementById('allianceName').value.trim();
             if (allianceInputVal) {
@@ -948,10 +938,30 @@
                 }
             }
 
-            // 1. Save combat readiness and submission details to svs_player_submissions
-            const submissionPayload = {
+            // Gather heroes data
+            const heroes = {};
+            heroKeys.forEach(key => {
+                const starsCb = document.getElementById(`hero_${key}_stars`);
+                const skillCb = document.getElementById(`hero_${key}_skill`);
+                heroes[key] = {
+                    stars: starsCb ? starsCb.checked : false,
+                    skill: skillCb ? skillCb.checked : false
+                };
+            });
+
+            const participationRadio = document.querySelector('input[name="participationType"]:checked');
+            const participationType = participationRadio ? participationRadio.value : 'none';
+
+            const timeSlots = [];
+            if (participationType === 'slots') {
+                document.querySelectorAll('.time-slot-checkbox:checked').forEach(cb => {
+                    timeSlots.push(cb.value);
+                });
+            }
+
+            const payload = {
                 player_id: playerId,
-                player_name: document.getElementById('playerName').value.trim(),
+                player_name: document.getElementById('playerName').value.trim() || 'Unknown',
                 usual_name: document.getElementById('usualName').value.trim() || null,
                 labyrinth_score: labyrinthVal,
                 state_id: fetchedStateNum,
@@ -959,73 +969,38 @@
                 infantry_level: document.getElementById('infantryLevel').value,
                 lancer_level: document.getElementById('lancerLevel').value,
                 marksman_level: document.getElementById('marksmanLevel').value,
-                updated_at: new Date()
-            };
-
-            const { error: subError } = await supabaseClient
-                .from('svs_player_submissions')
-                .upsert(submissionPayload, { onConflict: 'player_id' });
-
-            // 2. Save hero selections
-            const heroPayloads = [];
-            
-            heroKeys.forEach(heroName => {
-                const starsChecked = document.getElementById(`hero_${heroName}_stars`)?.checked || false;
-                const skillChecked = document.getElementById(`hero_${heroName}_skill`)?.checked || false;
-            
-                heroPayloads.push({
-                    player_id: playerId,
-                    hero_name: heroName,
-                    stars: starsChecked,
-                    skill_level: skillChecked,
-                    updated_at: new Date()
-                });
-            });
-            
-            const { error: heroError } = await supabaseClient
-                .from('player_heroes')
-                .upsert(heroPayloads, { onConflict: 'player_id,hero_name' });
-            
-            if (heroError) {
-                console.error('Error saving heroes:', heroError);
-            }
-
-            // 3. Save Castle Battle Availability
-            const selectedType = document.querySelector('input[name="participationType"]:checked')?.value || 'none';
-            let selectedSlots = [];
-            if (selectedType === 'slots') {
-                document.querySelectorAll('.time-slot-checkbox:checked').forEach(cb => {
-                    selectedSlots.push(cb.value);
-                });
-            }
-
-            const availPayload = {
-                player_id: playerId,
                 battle_date: currentNextSvsDate,
-                participation_type: selectedType,
-                time_slots: selectedSlots,
-                updated_at: new Date()
+                participation_type: participationType,
+                time_slots: timeSlots,
+                heroes: heroes
             };
 
-            const { error: availError } = await supabaseClient
-                .from('svs_availability')
-                .upsert(availPayload, { onConflict: 'player_id,battle_date' });
+            try {
+                const { data: result, error } = await supabaseClient.functions.invoke('save-registration', {
+                    body: payload
+                });
 
-            if (subError || heroError || availError) {
-                const errObj = subError || heroError || availError;
-                console.error("Save Error Details:", errObj);
-                feedbackEl.textContent = `Error: ${errObj.message || 'Check configuration'}`;
-                feedbackEl.className = "mt-4 text-center text-sm font-medium text-rose-400 h-6";
-            } else {
-                feedbackEl.textContent = "Saved successfully!";
-                feedbackEl.className = "mt-4 text-center text-sm font-medium text-emerald-400 h-6";
+                if (error) {
+                    throw new Error(error.message || 'Failed to invoke Edge Function.');
+                }
+
+                if (result && !result.success) {
+                    throw new Error(result.error || 'Failed to save registration.');
+                }
+
+                feedbackEl.textContent = "Registration saved successfully! 🍟";
+                feedbackEl.className = "text-center text-sm font-medium text-emerald-400 h-6";
+            } catch (err) {
+                console.error(err);
+                feedbackEl.textContent = `Error: Please ping Pims on Discord or in Game`;
+                feedbackEl.className = "text-center text-sm font-medium text-rose-400 h-6";
             }
 
             submitBtn.disabled = false;
             submitBtn.textContent = t.submitBtn;
         });
 
-        // Initialize language and check for remembered ID on startup
+        // Initialize UI & check remembered ID on startup
         currentLang = 'en';
         applyTranslations();
 
