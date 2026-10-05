@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WoS SvS Rally Matchmaker - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: system-ui, sans-serif; }
+        .card-custom { background-color: #111827; border: 1px solid #1f2937; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2); }
+        .form-control, .form-select { background-color: #1f2937; border: 1px solid #374151; color: #f3f4f6; }
+        .form-control:focus, .form-select:focus { background-color: #1f2937; border-color: #0ea5e9; color: #f3f4f6; box-shadow: 0 0 0 0.25rem rgba(14, 165, 233, 0.25); }
+        .btn-primary-custom { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: none; color: white; font-weight: 600; }
+        
+        /* Badge Styles */
+        .badge-unsure { background-color: #78350f; color: #fde68a; font-size: 0.75rem; padding: 0.3em 0.6em; font-weight: 600; }
+        .badge-no { background-color: #7f1d1d; color: #fecaca; font-size: 0.75rem; padding: 0.3em 0.6em; font-weight: 600; }
+        
+        /* Time Gradient Badge Styles */
+        .badge-slot-purple { background-color: #581c87 !important; color: #e9d5ff !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-blue { background-color: #1e3a8a !important; color: #bfdbfe !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-green { background-color: #065f46 !important; color: #a7f3d0 !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-yellow { background-color: #854d0e !important; color: #fef08a !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-orange { background-color: #9a3412 !important; color: #ffedd5 !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+        .badge-slot-default { background-color: #374151 !important; color: #d1d5db !important; font-size: 0.7rem; padding: 0.25em 0.5em; border-radius: 6px; font-weight: 600; }
+
+        /* Compact Single-Line Timeline Layout */
+        .timeline-row-container { display: flex; gap: 0.4rem; width: 100%; }
+        .timeline-block { background-color: #1f2937; border: 1px solid #374151; border-radius: 8px; flex: 1; min-width: 0; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.2); overflow: hidden; }
+        .timeline-block-header { padding: 0.4rem 0.5rem; font-size: 0.75rem; font-weight: bold; display: flex; justify-content: space-between; align-items: center; white-space: nowrap; }
+        .timeline-block-body { padding: 0.4rem; font-size: 0.7rem; color: #d1d5db; max-height: 180px; overflow-y: auto; line-height: 1.25; }
+    </style>
+</head>
+<body>
+
+    <div class="container py-4" style="max-width: 1000px;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="fw-bold text-light mb-0 fs-4">🛡 Alliance Rally Matchmaker</h2>
+                <span class="fs-6 text-info">Admin Panel</span>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <div id="battleDateDisplay" class="badge bg-secondary px-3 py-2 fs-6">Loading Battle Date...</div>
+                <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
+            </div>
+        </div>
+
+        <div class="card card-custom p-3 mb-4">
+            <h5 class="text-info mb-3">Player Availability Overview</h5>
+
+            <!-- Compact Single-Line Timeline Section -->
+            <div class="mb-3">
+                <h6 class="text-light mb-2 small fw-bold">Available Time Slots (Gradient Timeline)</h6>
+                <div id="timeslotTimelineContainer" class="timeline-row-container">
+                    <div class="text-muted small p-2">Loading timeline...</div>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="p-2 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-light mb-1 small fw-bold">Unsure Players (Fallback Pool)</h6>
+                        <div class="d-flex justify-content-between mb-1 small text-light fw-semibold" style="font-size: 0.8rem;">
+                            <span>Flexible / Unscheduled:</span>
+                            <span id="countUnscheduled" class="badge badge-unsure">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between small text-light fw-semibold" style="font-size: 0.8rem;">
+                            <span>On and Off:</span>
+                            <span id="countOnAndOff" class="badge badge-unsure">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="p-2 rounded-3 bg-dark border border-secondary h-100">
+                        <h6 class="text-light mb-1 small fw-bold">Unavailable Players</h6>
+                        <div class="d-flex justify-content-between align-items-center small text-light fw-semibold" style="font-size: 0.8rem;">
+                            <span>Won't participate (No):</span>
+                            <span id="countNo" class="badge badge-no">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="border-secondary my-2">
+
+            <div class="mb-2">
+                <label for="marchCount" class="form-label small fw-semibold text-light">How many rallies do you want?</label>
+                <input type="number" id="marchCount" class="form-control form-control-sm w-25" value="1" min="1" max="10">
+            </div>
+            <button class="btn btn-primary-custom btn-sm w-100 py-2" id="generateFieldsBtn">Generate March Configuration Rows</button>
+        </div>
+
+        <div id="marchConfigsContainer" class="mb-4"></div>
+        <button class="btn btn-success btn-lg w-100 mb-5 py-3 fw-bold shadow" id="runMatcherBtn" disabled>Calculate Rally Matches</button>
+        <div id="resultsArea"></div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://obszqwrlcsyryrnlzbkb.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qmrXoOVqi7SbYNabuzDkDA_4dMfYK8H';
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        const generateBtn = document.getElementById('generateFieldsBtn');
+        const marchCountInput = document.getElementById('marchCount');
+        const container = document.getElementById('marchConfigsContainer');
+        const runMatcherBtn = document.getElementById('runMatcherBtn');
+        const battleDateBadge = document.getElementById('battleDateDisplay');
+
+        const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
+        let currentBattleDate = null;
+
+        // Robust time slot badge matching
+        function getSlotBadgeClass(slot) {
+            const s = (slot || '').toLowerCase();
+            if (s.startsWith('12')) return 'badge-slot-purple';
+            if (s.startsWith('13')) return 'badge-slot-blue';
+            if (s.startsWith('14')) return 'badge-slot-green';
+            if (s.startsWith('15')) return 'badge-slot-yellow';
+            if (s.startsWith('16')) return 'badge-slot-orange';
+            return 'badge-slot-default';
+        }
+
+        async function protectRoute() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            const { data, error } = await supabase.functions.invoke('login');
+            if (error || !data?.authorized) {
+                await supabase.auth.signOut();
+                window.location.href = 'index.html';
+                return;
+            }
+            initAdminPanel();
+        }
+
+        protectRoute();
+
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'index.html';
+        });
+
+        async function initAdminPanel() {
+            try {
+                const { data: settingData, error: settingError } = await supabase
+                    .from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+                if (settingError || !settingData) throw new Error();
+                currentBattleDate = settingData.value;
+                battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
+
+                const [availRes, playersRes] = await Promise.all([
+                    supabase.from('svs_availability').select('*').eq('battle_date', currentBattleDate),
+                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name')
+                ]);
+
+                const playerMap = {};
+                (playersRes.data || []).forEach(p => {
+                    const pName = p.player_name || '';
+                    const uName = p.usual_name || '';
+                    playerMap[p.player_id] = uName ? `${pName} (${uName})` : (pName || 'Unknown Player');
+                });
+
+                let slotPlayers = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
+                
+                const targetOrder = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+
+                (availRes.data || []).forEach(row => {
+                    const pType = (row.participation_type || '').toLowerCase();
+                    const playerName = playerMap[row.player_id] || 'Unknown Player';
+
+                    if (pType === 'no') noCount++;
+                    else if (pType === 'unscheduled') unscheduledCount++;
+                    else if (pType === 'on_and_off') onAndOffCount++;
+                    else {
+                        let slots = row.time_slots;
+                        if (typeof slots === 'string') { try { slots = JSON.parse(slots); } catch(e) { slots = [slots]; } }
+                        if (Array.isArray(slots)) {
+                            slots.forEach(s => {
+                                if (!slotPlayers[s]) slotPlayers[s] = [];
+                                slotPlayers[s].push(playerName);
+                            });
+                        }
+                    }
+                });
+
+                const timelineContainer = document.getElementById('timeslotTimelineContainer');
+                const sortedSlots = Object.keys(slotPlayers).sort((a, b) => {
+                    const idxA = targetOrder.findIndex(t => a.includes(t));
+                    const idxB = targetOrder.findIndex(t => b.includes(t));
+                    return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
+                });
+
+                if (sortedSlots.length > 0) {
+                    timelineContainer.innerHTML = '';
+                    sortedSlots.forEach(slot => {
+                        const badgeClass = getSlotBadgeClass(slot);
+                        const playersListHtml = slotPlayers[slot].map(p => `<div class="text-truncate">• ${p}</div>`).join('');
+                        timelineContainer.innerHTML += `
+                            <div class="timeline-block">
+                                <div class="timeline-block-header ${badgeClass}">
+                                    <span class="text-truncate">${slot}</span>
+                                    <span class="badge bg-dark bg-opacity-75">${slotPlayers[slot].length}</span>
+                                </div>
+                                <div class="timeline-block-body">
+                                    ${playersListHtml}
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    timelineContainer.innerHTML = `<div class="text-muted small p-2">No specific time slots recorded.</div>`;
+                }
+
+                document.getElementById('countUnscheduled').textContent = unscheduledCount;
+                document.getElementById('countOnAndOff').textContent = onAndOffCount;
+                document.getElementById('countNo').textContent = noCount;
+            } catch (err) {
+                battleDateBadge.textContent = 'Error loading date';
+            }
+        }
+
+        generateBtn.addEventListener('click', () => {
+            const count = parseInt(marchCountInput.value) || 1;
+            container.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
+                availableHeroes.forEach(h => heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`);
+
+                const row = document.createElement('div');
+                row.className = 'card card-custom p-3 mb-3 march-row';
+                row.dataset.marchIndex = i;
+                row.innerHTML = `
+                    <h5 class="text-warning mb-3 fs-6">March ${i} Configuration</h5>
+                    <div class="row g-2 mb-2">
+                        <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control form-control-sm inf-ratio" value="60"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control form-control-sm lancer-ratio" value="40"></div>
+                        <div class="col-md-4"><label class="form-label small text-secondary">Marksman Ratio (%)</label><input type="number" class="form-control form-control-sm marksman-ratio" value="0"></div>
+                    </div>
+                    <h6 class="text-light mt-2 mb-2 small">4 Joiner Hero Requirements</h6>
+                    <div class="row g-2">
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 1</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 2</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 3</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                        <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 4</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
+                    </div>`;
+                container.appendChild(row);
+            }
+            runMatcherBtn.disabled = false;
+        });
+
+        runMatcherBtn.addEventListener('click', async () => {
+    if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
+    runMatcherBtn.disabled = true;
+    runMatcherBtn.textContent = 'Calculating Optimal Matches by Time Slot...';
+
+    try {
+        const marchRows = document.querySelectorAll('.march-row');
+        let marchesConfig = [];
+        marchRows.forEach(row => {
+            const inf = parseFloat(row.querySelector('.inf-ratio').value) || 0;
+            const lancer = parseFloat(row.querySelector('.lancer-ratio').value) || 0;
+            const marksman = parseFloat(row.querySelector('.marksman-ratio').value) || 0;
+            const joinerHeroes = Array.from(row.querySelectorAll('.joiner-hero')).map(sel => sel.value || null);
+            marchesConfig.push({ index: parseInt(row.dataset.marchIndex), ratios: { inf, lancer, marksman }, joinerHeroes });
+        });
+
+        const { data, error } = await supabase.functions.invoke('calculate-matches', {
+            body: { battleDate: currentBattleDate, marches: marchesConfig }
+        });
+        if (error) throw error;
+        if (!data.success) throw new Error(data.error);
+
+        let resultsHtml = `
+            <div class="card card-custom p-3 mb-4">
+                <h3 class="text-success mb-2 fs-5">Rally Match Results by Time Slot</h3>
+                <p class="text-muted small mb-3">Battle Date: ${currentBattleDate}</p>
+                <div class="row row-cols-1 row-cols-md-5 g-2" id="matchTimelineContainer">`;
+
+        const slotResults = data.slotResults || {};
+        const slots = Object.keys(slotResults);
+
+        if (slots.length > 0) {
+            slots.forEach(slot => {
+                const badgeClass = getSlotBadgeClass(slot);
+                const marchesForSlot = slotResults[slot];
+
+                let marchesHtml = '';
+                marchesForSlot.forEach(m => {
+                    let joinersList = m.joiners.map(j => {
+                        const isSlotConfirmed = j.participationType === 'slots';
+                        // Fixed: Changed text-muted to text-light text-opacity-75 for better readability
+                        const playerStyle = isSlotConfirmed 
+                            ? 'text-white fw-semibold' 
+                            : 'text-light text-opacity-75 fst-italic';
+                        
+                        const cleanHero = j.requiredHero && j.requiredHero !== 'Any' 
+                            ? j.requiredHero.replace('_skill', '').replace(/_/g, ' ') 
+                            : null;
+                        
+                        const heroBadge = cleanHero 
+                            ? `<span class="badge bg-dark border border-secondary text-info px-1 py-0.5" style="font-size: 0.55rem; text-transform: capitalize;">${cleanHero}</span>` 
+                            : `<span class="badge bg-dark text-secondary px-1 py-0.5" style="font-size: 0.55rem;">Any</span>`;
+
+                        return `
+                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-25" style="font-size: 0.7rem;">
+                                <div class="text-truncate pe-1">
+                                    <span class="text-secondary">S${j.slot}:</span> 
+                                    <span class="${playerStyle}">${j.playerName}</span>
+                                </div>
+                                <div class="flex-shrink-0">${heroBadge}</div>
+                            </div>`;
+                    }).join('');
+
+                    marchesHtml += `
+                        <div class="bg-black bg-opacity-25 p-2 rounded mb-2 border border-secondary">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-warning" style="font-size: 0.75rem;">M${m.marchIndex}</span>
+                                <span class="text-white fw-semibold text-truncate" style="font-size: 0.6rem; max-width: 90px;" title="${m.rallyLeader}">👑 ${m.rallyLeader}</span>
+                            </div>
+                            <div class="d-flex flex-column gap-1">
+                                ${joinersList}
+                            </div>
+                        </div>`;
+                });
+
+                resultsHtml += `
+                    <div class="col">
+                        <div class="card bg-dark border border-secondary p-2 rounded h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+                                <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.75rem;">${slot}</span>
+                                <span class="badge bg-secondary text-light" style="font-size: 0.55rem;">${marchesForSlot.length} Marches</span>
+                            </div>
+                            <div class="d-flex flex-column">
+                                ${marchesHtml}
+                            </div>
+                        </div>
+                    </div>`;
+            });
+        } else {
+            resultsHtml += `<div class="col-12 text-muted small p-2">No time slot matches generated.</div>`;
+        }
+
+        resultsHtml += `</div></div>`;
+        document.getElementById('resultsArea').innerHTML = resultsHtml;
+    } catch (err) {
+        alert('Error running matcher: ' + err.message);
+    } finally {
+        runMatcherBtn.disabled = false;
+        runMatcherBtn.textContent = 'Calculate Rally Matches';
+    }
+});
+    </script>
+</body>
+</html>
