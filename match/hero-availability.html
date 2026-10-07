@@ -88,7 +88,6 @@
                     return; 
                 }
 
-                // Optional auth function check - catch errors so it doesn't block loading if offline or misconfigured
                 try {
                     const { data, error } = await supabase.functions.invoke('login');
                     if (error || (data && data.authorized === false)) {
@@ -112,10 +111,16 @@
             window.location.href = 'index.html';
         });
 
+        // Helper to extract numeric troop level for sorting (e.g. "T10" -> 10, "10" -> 10)
+        function parseTroopLevel(levelStr) {
+            if (!levelStr) return 0;
+            const match = String(levelStr).match(/\d+/);
+            return match ? parseInt(match[0], 10) : 0;
+        }
+
         async function loadData() {
             try {
-                // 1. Get next SvS battle date with fallback
-                let battleDate = '2026-10-10'; // Default fallback date
+                let battleDate = '2026-10-10';
                 try {
                     const settingRes = await supabase.from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
                     if (settingRes.data && settingRes.data.value) {
@@ -128,10 +133,10 @@
                 currentBattleDate = battleDate;
                 battleDateSubtitle.textContent = `Target Battle Date: ${currentBattleDate}`;
 
-                // 2. Fetch datasets safely
-                const [heroesRes, playersRes, availRes, playerHeroesRes] = await Promise.all([
+                // Fetch data using exact schema table names & columns
+                const [heroesRes, submissionsRes, availRes, playerHeroesRes] = await Promise.all([
                     supabase.from('hero_expedition_skills').select('*').order('generation', { ascending: true }).order('hero_name', { ascending: true }),
-                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name'),
+                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name, infantry_level, lancer_level, marksman_level'),
                     supabase.from('svs_availability').select('*').eq('battle_date', currentBattleDate),
                     supabase.from('player_heroes').select('*')
                 ]);
@@ -141,11 +146,26 @@
                 globalHeroes = heroesRes.data || [];
                 
                 globalPlayers = {};
-                if (playersRes.data) {
-                    playersRes.data.forEach(p => {
+                if (submissionsRes.data) {
+                    submissionsRes.data.forEach(p => {
                         const fullName = p.player_name || '';
                         const usual = p.usual_name || '';
-                        globalPlayers[p.player_id] = usual ? `${fullName} (${usual})` : (fullName || 'Unknown Player');
+                        const displayName = usual ? `${fullName} (${usual})` : (fullName || 'Unknown Player');
+                        
+                        const inf = p.infantry_level || '-';
+                        const lan = p.lancer_level || '-';
+                        const mks = p.marksman_level || '-';
+
+                        // Calculate maximum numeric troop level across all three troop types for sorting
+                        const maxSortVal = Math.max(parseTroopLevel(inf), parseTroopLevel(lan), parseTroopLevel(mks));
+
+                        globalPlayers[p.player_id] = {
+                            name: displayName,
+                            infantry: inf,
+                            lancer: lan,
+                            marksman: mks,
+                            sortVal: maxSortVal
+                        };
                     });
                 }
 
@@ -192,10 +212,17 @@
 
             const createHeroCardHtml = (hero) => {
                 const hKey = hero.hero_name.toLowerCase();
-                const ownerIds = ownershipMap[hKey] || [];
+                let ownerIds = ownershipMap[hKey] || [];
+
+                // Sort owners by highest troop level descending (highest troops first)
+                ownerIds.sort((idA, idB) => {
+                    const valA = globalPlayers[idA]?.sortVal || 0;
+                    const valB = globalPlayers[idB]?.sortVal || 0;
+                    return valB - valA;
+                });
 
                 let ownersHtml = ownerIds.map(pId => {
-                    const playerName = globalPlayers[pId] || 'Unknown Player';
+                    const playerObj = globalPlayers[pId] || { name: 'Unknown Player', infantry: '-', lancer: '-', marksman: '-' };
                     const avail = globalAvailability[pId];
 
                     let badgeClass = 'badge-avail-other';
@@ -215,8 +242,11 @@
 
                     return `
                         <div class="player-badge d-flex justify-content-between align-items-center mb-1">
-                            <span class="text-light fw-semibold text-truncate pe-2">${playerName}</span>
-                            <span class="badge ${badgeClass} text-truncate" style="max-width: 160px; font-size: 0.7rem;" title="${availText}">${availText}</span>
+                            <div class="d-flex flex-column text-truncate pe-2">
+                                <span class="text-light fw-semibold">${playerObj.name}</span>
+                                <span class="text-info" style="font-size: 0.65rem;">Inf: ${playerObj.infantry} | Lan: ${playerObj.lancer} | Mks: ${playerObj.marksman}</span>
+                            </div>
+                            <span class="badge ${badgeClass} text-truncate flex-shrink-0" style="max-width: 140px; font-size: 0.7rem;" title="${availText}">${availText}</span>
                         </div>`;
                 }).join('');
 
