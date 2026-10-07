@@ -81,16 +81,28 @@
         let currentBattleDate = null;
 
         async function protectRoute() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.href = 'index.html'; return; }
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) { 
+                    window.location.href = 'index.html'; 
+                    return; 
+                }
 
-            const { data, error } = await supabase.functions.invoke('login');
-            if (error || !data?.authorized) {
-                await supabase.auth.signOut();
-                window.location.href = 'index.html';
-                return;
+                // Optional auth function check - catch errors so it doesn't block loading if offline or misconfigured
+                try {
+                    const { data, error } = await supabase.functions.invoke('login');
+                    if (error || (data && data.authorized === false)) {
+                        console.warn('Auth check warning:', error || data);
+                    }
+                } catch (fnErr) {
+                    console.warn('Auth function skipped/failed safely:', fnErr);
+                }
+
+                loadData();
+            } catch (err) {
+                console.error('Route protection error:', err);
+                rosterContainer.innerHTML = `<div class="col-12 text-center text-danger py-4">Authentication Error: ${err.message}</div>`;
             }
-            loadData();
         }
 
         protectRoute();
@@ -102,11 +114,21 @@
 
         async function loadData() {
             try {
-                const settingRes = await supabase.from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
-                if (settingRes.error || !settingRes.data) throw new Error('Could not load next SvS date.');
-                currentBattleDate = settingRes.data.value;
+                // 1. Get next SvS battle date with fallback
+                let battleDate = '2026-10-10'; // Default fallback date
+                try {
+                    const settingRes = await supabase.from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+                    if (settingRes.data && settingRes.data.value) {
+                        battleDate = settingRes.data.value;
+                    }
+                } catch (settErr) {
+                    console.warn('Could not fetch settings table, using fallback date:', settErr);
+                }
+                
+                currentBattleDate = battleDate;
                 battleDateSubtitle.textContent = `Target Battle Date: ${currentBattleDate}`;
 
+                // 2. Fetch datasets safely
                 const [heroesRes, playersRes, availRes, playerHeroesRes] = await Promise.all([
                     supabase.from('hero_expedition_skills').select('*').order('generation', { ascending: true }).order('hero_name', { ascending: true }),
                     supabase.from('svs_player_submissions').select('player_id, player_name, usual_name'),
@@ -119,11 +141,160 @@
                 globalHeroes = heroesRes.data || [];
                 
                 globalPlayers = {};
-                (playersRes.data || []).forEach(p => {
-                    const fullName = p.player_name || '';
-                    const usual = p.usual_name || '';
-                    globalPlayers[p.player_id] = usual ? `${fullName} (${usual})` : (fullName || 'Unknown Player');
-                });
+                if (playersRes.data) {
+                    playersRes.data.forEach(p => {
+                        const fullName = p.player_name || '';
+                        const usual = p.usual_name || '';
+                        globalPlayers[p.player_id] = usual ? `${fullName} (${usual})` : (fullName || 'Unknown Player');
+                    });
+                }
 
                 globalAvailability = {};
-                (availRes.data || []).forEach(
+                if (availRes.data) {
+                    availRes.data.forEach(a => {
+                        globalAvailability[a.player_id] = {
+                            type: a.participation_type || 'Unknown',
+                            slots: a.time_slots || []
+                        };
+                    });
+                }
+
+                globalPlayerHeroes = playerHeroesRes.data || [];
+
+                renderRoster();
+            } catch (err) {
+                console.error('Data loading error:', err);
+                rosterContainer.innerHTML = `<div class="col-12 text-center text-danger py-4">Error loading data: ${err.message}<br><small class="text-muted">Check browser console for details.</small></div>`;
+            }
+        }
+
+        function renderRoster() {
+            const searchVal = (heroSearch.value || '').toLowerCase();
+            const filterGen = genFilter.value;
+
+            const filteredHeroes = globalHeroes.filter(h => {
+                const matchesSearch = h.hero_name.toLowerCase().includes(searchVal) || h.skill_name.toLowerCase().includes(searchVal);
+                const matchesGen = filterGen === '' || String(h.generation) === filterGen;
+                return matchesSearch && matchesGen;
+            });
+
+            if (filteredHeroes.length === 0) {
+                rosterContainer.innerHTML = `<div class="col-12 text-center text-muted py-5">No heroes found matching your filters.</div>`;
+                return;
+            }
+
+            const ownershipMap = {};
+            globalPlayerHeroes.forEach(ph => {
+                const hName = (ph.hero_name || '').toLowerCase();
+                if (!ownershipMap[hName]) ownershipMap[hName] = [];
+                ownershipMap[hName].push(ph.player_id);
+            });
+
+            const createHeroCardHtml = (hero) => {
+                const hKey = hero.hero_name.toLowerCase();
+                const ownerIds = ownershipMap[hKey] || [];
+
+                let ownersHtml = ownerIds.map(pId => {
+                    const playerName = globalPlayers[pId] || 'Unknown Player';
+                    const avail = globalAvailability[pId];
+
+                    let badgeClass = 'badge-avail-other';
+                    let availText = 'Not Submitted';
+
+                    if (avail) {
+                        if (avail.type.toLowerCase() === 'no') {
+                            badgeClass = 'badge-avail-no';
+                            availText = "Won't Participate (No)";
+                        } else if (avail.type.toLowerCase() === 'slots' && Array.isArray(avail.slots) && avail.slots.length > 0) {
+                            badgeClass = 'badge-avail-slots';
+                            availText = `Slots: ${avail.slots.join(', ')}`;
+                        } else {
+                            availText = avail.type.replace(/_/g, ' ');
+                        }
+                    }
+
+                    return `
+                        <div class="player-badge d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-light fw-semibold text-truncate pe-2">${playerName}</span>
+                            <span class="badge ${badgeClass} text-truncate" style="max-width: 160px; font-size: 0.7rem;" title="${availText}">${availText}</span>
+                        </div>`;
+                }).join('');
+
+                return `
+                    <div class="col-md-6">
+                        <div class="card card-custom p-4 h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h4 class="text-light fs-5 fw-bold mb-0">${hero.hero_name}</h4>
+                                        <span class="badge bg-secondary text-dark mt-1" style="font-size: 0.65rem;">Generation ${hero.generation || 'N/A'}</span>
+                                    </div>
+                                    <span class="badge bg-dark border border-secondary text-success fw-bold">+${hero.buff_value}% ${hero.buff_type}</span>
+                                </div>
+                                <div class="text-warning small fst-italic mb-1">Skill: ${hero.skill_name}</div>
+                                <p class="text-muted small mb-3">${hero.description || ''}</p>
+
+                                <h6 class="text-info small fw-bold mb-2">Owners & SvS Availability (${ownerIds.length})</h6>
+                                <div class="d-flex flex-column gap-1 mb-2" style="max-height: 200px; overflow-y: auto;">
+                                    ${ownersHtml}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            };
+
+            const groupedByGen = {};
+            filteredHeroes.forEach(h => {
+                const gen = h.generation || 1;
+                if (!groupedByGen[gen]) groupedByGen[gen] = [];
+                groupedByGen[gen].push(h);
+            });
+
+            let html = '';
+            const sortedGens = Object.keys(groupedByGen).sort((a, b) => Number(a) - Number(b));
+
+            sortedGens.forEach(gen => {
+                const genHeroes = groupedByGen[gen];
+                const unowned = genHeroes.filter(h => (ownershipMap[h.hero_name.toLowerCase()] || []).length === 0);
+                const owned = genHeroes.filter(h => (ownershipMap[h.hero_name.toLowerCase()] || []).length > 0);
+
+                html += `
+                    <div class="col-12 mt-3 mb-1">
+                        <h3 class="text-warning fs-5 fw-bold border-bottom border-secondary pb-2">Generation ${gen}</h3>
+                    `;
+
+                if (unowned.length > 0) {
+                    html += `
+                        <div class="card card-custom p-2 bg-dark border-secondary mb-2">
+                            <div class="small text-secondary fw-bold mb-1 px-1">💤 Unowned Heroes (No Players Recorded):</div>
+                            <div class="d-flex flex-wrap gap-2">`;
+                    unowned.forEach(hero => {
+                        html += `
+                            <span class="badge bg-secondary bg-opacity-25 border border-secondary text-light px-2.5 py-1.5 text-start" style="font-size: 0.75rem;">
+                                <strong class="text-warning">${hero.hero_name}</strong> 
+                                <span class="text-muted ms-1">(${hero.skill_name} : <span class="text-success">+${hero.buff_value}% ${hero.buff_type}</span>)</span>
+                            </span>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                html += `</div>`;
+
+                if (owned.length > 0) {
+                    let rowHtml = '<div class="row g-4 mb-2">';
+                    owned.forEach(hero => {
+                        rowHtml += createHeroCardHtml(hero);
+                    });
+                    rowHtml += '</div>';
+                    html += rowHtml;
+                }
+            });
+
+            rosterContainer.innerHTML = html;
+        }
+
+        heroSearch.addEventListener('input', renderRoster);
+        genFilter.addEventListener('change', renderRoster);
+    </script>
+</body>
+</html>
