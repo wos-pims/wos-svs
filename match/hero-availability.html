@@ -16,7 +16,7 @@
 </head>
 <body>
 
-    <div class="container py-4" style="max-width: 1100px;">
+    <div class="container py-4" style="max-width: 1000px;">
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -24,7 +24,9 @@
                 <span class="fs-6 text-info" id="battleDateSubtitle">Loading Battle Date...</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="wos-command-center-ch1p5.html" class="btn btn-outline-info btn-sm">← Back to Admin Panel</a>
+                <a href="wos-command-center-ch1p5.html" class="btn btn-outline-info btn-sm">🛡 Admin Panel</a>
+                <a href="rally-strategies.html" class="btn btn-outline-warning btn-sm">📖 Strategies</a>
+                <a href="hero-availability.html" class="btn btn-warning btn-sm">🦸‍♂️ Hero Roster</a>
                 <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
             </div>
         </div>
@@ -111,11 +113,18 @@
             window.location.href = 'index.html';
         });
 
-        // Helper to extract numeric troop level for sorting (e.g. "T10" -> 10, "10" -> 10)
+        // Robust troop level parser handling FC (Fire Crystal) and T (Tier) levels correctly
         function parseTroopLevel(levelStr) {
             if (!levelStr) return 0;
-            const match = String(levelStr).match(/\d+/);
-            return match ? parseInt(match[0], 10) : 0;
+            const str = String(levelStr).toUpperCase().trim();
+            const match = str.match(/\d+/);
+            const num = match ? parseInt(match[0], 10) : 0;
+            if (str.includes('FC')) {
+                return 1000 + num; // FC levels rank highest (e.g., FC10 = 1010, FC9 = 1009)
+            } else if (str.includes('T')) {
+                return 100 + num;  // Tier levels (e.g., T11 = 111, T10 = 110)
+            }
+            return num;
         }
 
         async function loadData() {
@@ -133,7 +142,6 @@
                 currentBattleDate = battleDate;
                 battleDateSubtitle.textContent = `Target Battle Date: ${currentBattleDate}`;
 
-                // Fetch data using exact schema table names & columns
                 const [heroesRes, submissionsRes, availRes, playerHeroesRes] = await Promise.all([
                     supabase.from('hero_expedition_skills').select('*').order('generation', { ascending: true }).order('hero_name', { ascending: true }),
                     supabase.from('svs_player_submissions').select('player_id, player_name, usual_name, infantry_level, lancer_level, marksman_level'),
@@ -156,7 +164,6 @@
                         const lan = p.lancer_level || '-';
                         const mks = p.marksman_level || '-';
 
-                        // Calculate maximum numeric troop level across all three troop types for sorting
                         const maxSortVal = Math.max(parseTroopLevel(inf), parseTroopLevel(lan), parseTroopLevel(mks));
 
                         globalPlayers[p.player_id] = {
@@ -214,7 +221,7 @@
                 const hKey = hero.hero_name.toLowerCase();
                 let ownerIds = ownershipMap[hKey] || [];
 
-                // Sort owners by highest troop level descending (highest troops first)
+                // Sort owners by highest troop level descending (highest troops first, ensuring FC10 appears before FC9)
                 ownerIds.sort((idA, idB) => {
                     const valA = globalPlayers[idA]?.sortVal || 0;
                     const valB = globalPlayers[idB]?.sortVal || 0;
