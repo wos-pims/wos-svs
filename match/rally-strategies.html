@@ -19,10 +19,13 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="fw-bold text-light mb-0 fs-4">📖 Alliance Strategy & Hero Buffs</h2>
-                <span class="fs-6 text-info">Reference Library</span>
+                <span class="fs-6 text-info" id="battleDateSubtitle">Reference Library</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="wos-command-center-ch1p5.html" class="btn btn-outline-info btn-sm">← Back to Admin Panel</a>
+                <a href="wos-command-center-ch1p5.html" class="btn btn-outline-info btn-sm">🛡 Admin Panel</a>
+                <a href="rally-strategies.html" class="btn btn-warning btn-sm">📖 Strategies</a>
+                <a href="hero-availability.html" class="btn btn-outline-warning btn-sm">🦸‍♂️ Hero Roster</a>
+                <div id="battleDateBadge" class="badge bg-secondary px-2 py-1 fs-6 d-none d-md-block">Loading...</div>
                 <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
             </div>
         </div>
@@ -42,6 +45,7 @@
 
         const logoutBtn = document.getElementById('logoutBtn');
         const strategiesContainer = document.getElementById('strategiesContainer');
+        const battleDateBadge = document.getElementById('battleDateBadge');
 
         async function protectRoute() {
             const { data: { session } } = await supabase.auth.getSession();
@@ -53,6 +57,7 @@
                 window.location.href = 'index.html';
                 return;
             }
+            loadBattleDate();
             loadStrategiesAndBuffs();
         }
 
@@ -63,9 +68,21 @@
             window.location.href = 'index.html';
         });
 
+        async function loadBattleDate() {
+            try {
+                const { data } = await supabase.from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
+                if (data && data.value) {
+                    battleDateBadge.textContent = `Next SvS: ${data.value}`;
+                } else {
+                    battleDateBadge.textContent = 'Next SvS: TBD';
+                }
+            } catch (e) {
+                battleDateBadge.textContent = 'Next SvS: TBD';
+            }
+        }
+
         async function loadStrategiesAndBuffs() {
             try {
-                // Fetch strategies and expedition skills concurrently
                 const [stratRes, skillsRes] = await Promise.all([
                     supabase.from('alliance_strategies').select('*').order('display_name'),
                     supabase.from('hero_expedition_skills').select('*')
@@ -92,7 +109,6 @@
                     const marksman = strat.marksman_ratio;
                     const heroes = Array.isArray(strat.recommended_heroes) ? strat.recommended_heroes : [];
 
-                    // Build hero cards with buffs
                     let heroesHtml = '';
                     if (heroes.length > 0) {
                         heroes.forEach(heroName => {
@@ -127,7 +143,8 @@
                                         <h4 class="text-light fs-5 fw-bold mb-0">${strat.display_name}</h4>
                                         <span class="badge bg-dark border border-secondary text-info font-monospace">${strat.strategy_key}</span>
                                     </div>
-                                    <p class="text-muted small mb-3">${strat.description || 'No description provided.'}</p>
+                                    <!-- Fixed text readability: changed text-muted to text-light text-opacity-75 -->
+                                    <p class="text-light text-opacity-75 small mb-3">${strat.description || 'No description provided.'}</p>
                                     
                                     <!-- Ratios Progress Bars -->
                                     <div class="mb-3 p-2 bg-dark rounded border border-secondary">
