@@ -40,9 +40,10 @@
                 <span class="fs-6 text-info">Admin Panel</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <a href="rally-strategies.html" class="btn btn-outline-warning btn-sm">📖 Strategies & Buffs</a>
+                <a href="wos-command-center-ch1p5.html" class="btn btn-warning btn-sm">🛡 Admin Panel</a>
+                <a href="rally-strategies.html" class="btn btn-outline-warning btn-sm">📖 Strategies</a>
                 <a href="hero-availability.html" class="btn btn-outline-warning btn-sm">🦸‍♂️ Hero Roster</a>
-                <div id="battleDateDisplay" class="badge bg-secondary px-3 py-2 fs-6">Loading Battle Date...</div>
+                <div id="battleDateDisplay" class="badge bg-secondary px-2 py-1 fs-6">Loading...</div>
                 <button id="logoutBtn" class="btn btn-outline-danger btn-sm">Logout</button>
             </div>
         </div>
@@ -115,7 +116,6 @@
         const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
 
-        // Robust time slot badge matching
         function getSlotBadgeClass(slot) {
             const s = (slot || '').toLowerCase();
             if (s.startsWith('12')) return 'badge-slot-purple';
@@ -254,106 +254,105 @@
         });
 
         runMatcherBtn.addEventListener('click', async () => {
-    if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
-    runMatcherBtn.disabled = true;
-    runMatcherBtn.textContent = 'Calculating Optimal Matches by Time Slot...';
+            if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
+            runMatcherBtn.disabled = true;
+            runMatcherBtn.textContent = 'Calculating Optimal Matches by Time Slot...';
 
-    try {
-        const marchRows = document.querySelectorAll('.march-row');
-        let marchesConfig = [];
-        marchRows.forEach(row => {
-            const inf = parseFloat(row.querySelector('.inf-ratio').value) || 0;
-            const lancer = parseFloat(row.querySelector('.lancer-ratio').value) || 0;
-            const marksman = parseFloat(row.querySelector('.marksman-ratio').value) || 0;
-            const joinerHeroes = Array.from(row.querySelectorAll('.joiner-hero')).map(sel => sel.value || null);
-            marchesConfig.push({ index: parseInt(row.dataset.marchIndex), ratios: { inf, lancer, marksman }, joinerHeroes });
-        });
-
-        const { data, error } = await supabase.functions.invoke('calculate-matches', {
-            body: { battleDate: currentBattleDate, marches: marchesConfig }
-        });
-        if (error) throw error;
-        if (!data.success) throw new Error(data.error);
-
-        let resultsHtml = `
-            <div class="card card-custom p-3 mb-4">
-                <h3 class="text-success mb-2 fs-5">Rally Match Results by Time Slot</h3>
-                <p class="text-muted small mb-3">Battle Date: ${currentBattleDate}</p>
-                <div class="row row-cols-1 row-cols-md-5 g-2" id="matchTimelineContainer">`;
-
-        const slotResults = data.slotResults || {};
-        const slots = Object.keys(slotResults);
-
-        if (slots.length > 0) {
-            slots.forEach(slot => {
-                const badgeClass = getSlotBadgeClass(slot);
-                const marchesForSlot = slotResults[slot];
-
-                let marchesHtml = '';
-                marchesForSlot.forEach(m => {
-                    let joinersList = m.joiners.map(j => {
-                        const isSlotConfirmed = j.participationType === 'slots';
-                        // Fixed: Changed text-muted to text-light text-opacity-75 for better readability
-                        const playerStyle = isSlotConfirmed 
-                            ? 'text-white fw-semibold' 
-                            : 'text-light text-opacity-75 fst-italic';
-                        
-                        const cleanHero = j.requiredHero && j.requiredHero !== 'Any' 
-                            ? j.requiredHero.replace('_skill', '').replace(/_/g, ' ') 
-                            : null;
-                        
-                        const heroBadge = cleanHero 
-                            ? `<span class="badge bg-dark border border-secondary text-info px-1 py-0.5" style="font-size: 0.55rem; text-transform: capitalize;">${cleanHero}</span>` 
-                            : `<span class="badge bg-dark text-secondary px-1 py-0.5" style="font-size: 0.55rem;">Any</span>`;
-
-                        return `
-                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-25" style="font-size: 0.7rem;">
-                                <div class="text-truncate pe-1">
-                                    <span class="text-secondary">S${j.slot}:</span> 
-                                    <span class="${playerStyle}">${j.playerName}</span>
-                                </div>
-                                <div class="flex-shrink-0">${heroBadge}</div>
-                            </div>`;
-                    }).join('');
-
-                    marchesHtml += `
-                        <div class="bg-black bg-opacity-25 p-2 rounded mb-2 border border-secondary">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold text-warning" style="font-size: 0.75rem;">M${m.marchIndex}</span>
-                                <span class="text-white fw-semibold text-truncate" style="font-size: 0.6rem; max-width: 90px;" title="${m.rallyLeader}">👑 ${m.rallyLeader}</span>
-                            </div>
-                            <div class="d-flex flex-column gap-1">
-                                ${joinersList}
-                            </div>
-                        </div>`;
+            try {
+                const marchRows = document.querySelectorAll('.march-row');
+                let marchesConfig = [];
+                marchRows.forEach(row => {
+                    const inf = parseFloat(row.querySelector('.inf-ratio').value) || 0;
+                    const lancer = parseFloat(row.querySelector('.lancer-ratio').value) || 0;
+                    const marksman = parseFloat(row.querySelector('.marksman-ratio').value) || 0;
+                    const joinerHeroes = Array.from(row.querySelectorAll('.joiner-hero')).map(sel => sel.value || null);
+                    marchesConfig.push({ index: parseInt(row.dataset.marchIndex), ratios: { inf, lancer, marksman }, joinerHeroes });
                 });
 
-                resultsHtml += `
-                    <div class="col">
-                        <div class="card bg-dark border border-secondary p-2 rounded h-100">
-                            <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
-                                <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.75rem;">${slot}</span>
-                                <span class="badge bg-secondary text-light" style="font-size: 0.55rem;">${marchesForSlot.length} Marches</span>
-                            </div>
-                            <div class="d-flex flex-column">
-                                ${marchesHtml}
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        } else {
-            resultsHtml += `<div class="col-12 text-muted small p-2">No time slot matches generated.</div>`;
-        }
+                const { data, error } = await supabase.functions.invoke('calculate-matches', {
+                    body: { battleDate: currentBattleDate, marches: marchesConfig }
+                });
+                if (error) throw error;
+                if (!data.success) throw new Error(data.error);
 
-        resultsHtml += `</div></div>`;
-        document.getElementById('resultsArea').innerHTML = resultsHtml;
-    } catch (err) {
-        alert('Error running matcher: ' + err.message);
-    } finally {
-        runMatcherBtn.disabled = false;
-        runMatcherBtn.textContent = 'Calculate Rally Matches';
-    }
-});
+                let resultsHtml = `
+                    <div class="card card-custom p-3 mb-4">
+                        <h3 class="text-success mb-2 fs-5">Rally Match Results by Time Slot</h3>
+                        <p class="text-muted small mb-3">Battle Date: ${currentBattleDate}</p>
+                        <div class="row row-cols-1 row-cols-md-5 g-2" id="matchTimelineContainer">`;
+
+                const slotResults = data.slotResults || {};
+                const slots = Object.keys(slotResults);
+
+                if (slots.length > 0) {
+                    slots.forEach(slot => {
+                        const badgeClass = getSlotBadgeClass(slot);
+                        const marchesForSlot = slotResults[slot];
+
+                        let marchesHtml = '';
+                        marchesForSlot.forEach(m => {
+                            let joinersList = m.joiners.map(j => {
+                                const isSlotConfirmed = j.participationType === 'slots';
+                                const playerStyle = isSlotConfirmed 
+                                    ? 'text-white fw-semibold' 
+                                    : 'text-light text-opacity-75 fst-italic';
+                                
+                                const cleanHero = j.requiredHero && j.requiredHero !== 'Any' 
+                                    ? j.requiredHero.replace('_skill', '').replace(/_/g, ' ') 
+                                    : null;
+                                
+                                const heroBadge = cleanHero 
+                                    ? `<span class="badge bg-dark border border-secondary text-info px-1 py-0.5" style="font-size: 0.55rem; text-transform: capitalize;">${cleanHero}</span>` 
+                                    : `<span class="badge bg-dark text-secondary px-1 py-0.5" style="font-size: 0.55rem;">Any</span>`;
+
+                                return `
+                                    <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-secondary border-opacity-25" style="font-size: 0.7rem;">
+                                        <div class="text-truncate pe-1">
+                                            <span class="text-secondary">S${j.slot}:</span> 
+                                            <span class="${playerStyle}">${j.playerName}</span>
+                                        </div>
+                                        <div class="flex-shrink-0">${heroBadge}</div>
+                                    </div>`;
+                            }).join('');
+
+                            marchesHtml += `
+                                <div class="bg-black bg-opacity-25 p-2 rounded mb-2 border border-secondary">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold text-warning" style="font-size: 0.75rem;">M${m.marchIndex}</span>
+                                        <span class="text-white fw-semibold text-truncate" style="font-size: 0.6rem; max-width: 90px;" title="${m.rallyLeader}">👑 ${m.rallyLeader}</span>
+                                    </div>
+                                    <div class="d-flex flex-column gap-1">
+                                        ${joinersList}
+                                    </div>
+                                </div>`;
+                        });
+
+                        resultsHtml += `
+                            <div class="col">
+                                <div class="card bg-dark border border-secondary p-2 rounded h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom border-secondary">
+                                        <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.75rem;">${slot}</span>
+                                        <span class="badge bg-secondary text-light" style="font-size: 0.55rem;">${marchesForSlot.length} Marches</span>
+                                    </div>
+                                    <div class="d-flex flex-column">
+                                        ${marchesHtml}
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                } else {
+                    resultsHtml += `<div class="col-12 text-muted small p-2">No time slot matches generated.</div>`;
+                }
+
+                resultsHtml += `</div></div>`;
+                document.getElementById('resultsArea').innerHTML = resultsHtml;
+            } catch (err) {
+                alert('Error running matcher: ' + err.message);
+            } finally {
+                runMatcherBtn.disabled = false;
+                runMatcherBtn.textContent = 'Calculate Rally Matches';
+            }
+        });
     </script>
 </body>
 </html>
