@@ -146,7 +146,7 @@
                     supabase.from('hero_expedition_skills').select('*').order('generation', { ascending: true }).order('hero_name', { ascending: true }),
                     supabase.from('svs_player_submissions').select('player_id, player_name, usual_name, infantry_level, lancer_level, marksman_level'),
                     supabase.from('svs_availability').select('*').eq('battle_date', currentBattleDate),
-                    supabase.from('player_heroes').select('*')
+                    supabase.from('player_heroes').select('*').or('skill_level.eq.true,stars.eq.true')
                 ]);
 
                 if (heroesRes.error) throw heroesRes.error;
