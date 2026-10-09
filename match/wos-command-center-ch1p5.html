@@ -113,8 +113,9 @@
         const runMatcherBtn = document.getElementById('runMatcherBtn');
         const battleDateBadge = document.getElementById('battleDateDisplay');
 
-        const availableHeroes = ['bradley', 'edith', 'gatot', 'hector', 'hendricks', 'jasser', 'jessie', 'magnus', 'mia', 'norah', 'patrick', 'reina', 'renee', 'seo_yoon'];
         let currentBattleDate = null;
+        let globalStrategies = [];
+        let globalHeroes = [];
 
         function getSlotBadgeClass(slot) {
             const s = (slot || '').toLowerCase();
@@ -148,16 +149,21 @@
 
         async function initAdminPanel() {
             try {
-                const { data: settingData, error: settingError } = await supabase
-                    .from('settings').select('value').eq('key', 'next_svs_date').maybeSingle();
-                if (settingError || !settingData) throw new Error();
-                currentBattleDate = settingData.value;
+                // Fetch settings, availability, submissions, strategies, and heroes concurrently
+                const [settingRes, availRes, playersRes, stratRes, heroesRes] = await Promise.all([
+                    supabase.from('settings').select('value').eq('key', 'next_svs_date').maybeSingle(),
+                    supabase.from('svs_availability').select('*'),
+                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name'),
+                    supabase.from('alliance_strategies').select('*').order('display_name'),
+                    supabase.from('hero_expedition_skills').select('hero_name').order('hero_name')
+                ]);
+
+                if (settingRes.error || !settingRes.data) throw new Error('Could not load battle date.');
+                currentBattleDate = settingRes.data.value;
                 battleDateBadge.textContent = `Next SvS: ${currentBattleDate}`;
 
-                const [availRes, playersRes] = await Promise.all([
-                    supabase.from('svs_availability').select('*').eq('battle_date', currentBattleDate),
-                    supabase.from('svs_player_submissions').select('player_id, player_name, usual_name')
-                ]);
+                globalStrategies = stratRes.data || [];
+                globalHeroes = heroesRes.data || [];
 
                 const playerMap = {};
                 (playersRes.data || []).forEach(p => {
@@ -167,10 +173,9 @@
                 });
 
                 let slotPlayers = {}, unscheduledCount = 0, onAndOffCount = 0, noCount = 0;
-                
                 const targetOrder = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
 
-                (availRes.data || []).forEach(row => {
+                (availRes.data || []).filter(a => a.battle_date === currentBattleDate).forEach(row => {
                     const pType = (row.participation_type || '').toLowerCase();
                     const playerName = playerMap[row.player_id] || 'Unknown Player';
 
@@ -213,13 +218,14 @@
                             </div>`;
                     });
                 } else {
-                    timelineContainer.innerHTML = `<div class="text-muted small p-2">No specific time slots recorded.</div>`;
+                    timelineContainer.innerHTML = `<div class="text-muted small p-2">No specific time slots recorded for this date.</div>`;
                 }
 
                 document.getElementById('countUnscheduled').textContent = unscheduledCount;
                 document.getElementById('countOnAndOff').textContent = onAndOffCount;
                 document.getElementById('countNo').textContent = noCount;
             } catch (err) {
+                console.error(err);
                 battleDateBadge.textContent = 'Error loading date';
             }
         }
@@ -227,15 +233,32 @@
         generateBtn.addEventListener('click', () => {
             const count = parseInt(marchCountInput.value) || 1;
             container.innerHTML = '';
-            for (let i = 1; i <= count; i++) {
-                let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
-                availableHeroes.forEach(h => heroOptions += `<option value="${h}_skill">${h.toUpperCase()} (Skill Active)</option>`);
 
+            // Build Strategy Options
+            let strategyOptions = `<option value="">-- Custom / Manual (No Strategy) --</option>`;
+            globalStrategies.forEach(strat => {
+                strategyOptions += `<option value="${strat.strategy_key}">${strat.display_name}</option>`;
+            });
+
+            // Build Hero Options
+            let heroOptions = `<option value="">-- Any Hero (No Requirement) --</option>`;
+            globalHeroes.forEach(h => {
+                const val = `${h.hero_name.toLowerCase().replace(/\s+/g, '_')}_skill`;
+                heroOptions += `<option value="${val}">${h.hero_name} (Skill Active)</option>`;
+            });
+
+            for (let i = 1; i <= count; i++) {
                 const row = document.createElement('div');
                 row.className = 'card card-custom p-3 mb-3 march-row';
                 row.dataset.marchIndex = i;
                 row.innerHTML = `
-                    <h5 class="text-warning mb-3 fs-6">March ${i} Configuration</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-warning mb-0 fs-6">March ${i} Configuration</h5>
+                        <div class="w-50">
+                            <label class="form-label small text-secondary mb-1">Alliance Strategy Preset</label>
+                            <select class="form-select form-select-sm strategy-select">${strategyOptions}</select>
+                        </div>
+                    </div>
                     <div class="row g-2 mb-2">
                         <div class="col-md-4"><label class="form-label small text-secondary">Infantry Ratio (%)</label><input type="number" class="form-control form-control-sm inf-ratio" value="60"></div>
                         <div class="col-md-4"><label class="form-label small text-secondary">Lancer Ratio (%)</label><input type="number" class="form-control form-control-sm lancer-ratio" value="40"></div>
@@ -248,10 +271,56 @@
                         <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 3</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
                         <div class="col-md-3"><label class="form-label small text-muted mb-1">Joiner 4</label><select class="form-select form-select-sm joiner-hero">${heroOptions}</select></div>
                     </div>`;
+
                 container.appendChild(row);
+
+                const stratSelect = row.querySelector('.strategy-select');
+                const infInput = row.querySelector('.inf-ratio');
+                const lancerInput = row.querySelector('.lancer-ratio');
+                const marksmanInput = row.querySelector('.marksman-ratio');
+                const heroSelects = row.querySelectorAll('.joiner-hero');
+
+                // Auto-select first strategy by default if available
+                if (globalStrategies.length > 0) {
+                    stratSelect.value = globalStrategies[0].strategy_key;
+                    applyStrategy(globalStrategies[0], infInput, lancerInput, marksmanInput, heroSelects);
+                }
+
+                // Handle strategy change event
+                stratSelect.addEventListener('change', (e) => {
+                    const selectedKey = e.target.value;
+                    const strat = globalStrategies.find(s => s.strategy_key === selectedKey);
+                    if (strat) {
+                        applyStrategy(strat, infInput, lancerInput, marksmanInput, heroSelects);
+                    }
+                });
             }
             runMatcherBtn.disabled = false;
         });
+
+        function applyStrategy(strat, infInput, lancerInput, marksmanInput, heroSelects) {
+            infInput.value = strat.infantry_ratio;
+            lancerInput.value = strat.lancer_ratio;
+            marksmanInput.value = strat.marksman_ratio;
+
+            const recHeroes = Array.isArray(strat.recommended_heroes) ? strat.recommended_heroes : [];
+            heroSelects.forEach((sel, index) => {
+                const targetHero = recHeroes[index] ? recHeroes[index].toLowerCase().trim() : '';
+                let matched = false;
+                if (targetHero) {
+                    for (let opt of sel.options) {
+                        if (opt.value.toLowerCase().includes(targetHero) || opt.text.toLowerCase().includes(targetHero)) {
+                            sel.value = opt.value;
+                            matched = true;
+                            break;
+                        }
+                    }
+                }
+                if (!matched) {
+                    sel.value = "";
+                }
+            });
+        }
 
         runMatcherBtn.addEventListener('click', async () => {
             if (!currentBattleDate) { alert('Battle date not loaded.'); return; }
